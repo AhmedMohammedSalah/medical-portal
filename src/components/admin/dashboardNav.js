@@ -7,7 +7,7 @@ function Nav() {
         <div className="flex flex-row items-center justify-between h-16 p-2">
             {/* Logo */}
             <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-white">Drug Finder</h1>
+                <h1 className="text-2xl font-bold text-white">Medical Portal</h1>
             </div>
 
             {/* Navigation Links */}

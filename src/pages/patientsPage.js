@@ -4,113 +4,104 @@ Description: Drugs page for the pharmacy dashboard, showcasing a list of items w
 */
 import { useState } from 'react';
 import { TrashIcon, PencilIcon, HomeIcon } from '@heroicons/react/24/solid';
+import { Search, User, Menu, X } from "lucide-react"
 import IconButton from '../components/shared/btn'; 
 import Modal from "../components/shared/modal";
+import MedCard from '../components/shared/MedCard';
 
-function Drugs() {
+ const Users = [
+    {name: 'Sara Mahmoud', speciality: "spetiality", id: '1'},
+    {name: 'Amira Mohamed', speciality: "spetiality", id: '2'},
+    {name: 'Ahmed Salah', speciality: "spetiality", id: '3'},
+    {name: 'Ahmed Senuse', speciality: "spetiality", id: '4'},
+    {name: 'Omar Khaled', speciality: "spetiality", id: '5'},
+
+  ];
+
+
+function Patients() {
   const [showModal, setShowModal] = useState(false);
-  const [items, setItems] = useState(['Item 1', 'Item 2']); // Example data
+  // const [items, setItems] = useState(['item1' , 'item2']); // Example data
+  const [users , setUsers] = useState(Users);
 
   const handleDelete = (index) => {
-    setItems(items.filter((_, i) => i !== index));
+    setUsers(Users.filter((_, i) => i !== index));
+    setShowModal(false)
+  };
+
+  const handleDeleteuser = (index) => {
+    setShowModal(true);
+    // Logic to delete the user can be added here
+    // For now, we just log the index
+    console.log(`Deleting user at index: ${index}`);
+    // After confirming deletion, you can remove the user from the list
+    // setUsers(Users.filter((_, i) => i !== index));
   };
 
   const handleEdit = (index) => {
-    setShowModal(true);
+    
   };
 
   return (
-    <div className="p-4 bg-emerald-50">
-      <h1 className="text-2xl font-bold">Pharmacy Dashboard</h1>
-      
-      {/* Home Button */}
-      <IconButton
-        btnColor="blue"
-        btnShade="500"
-        textColor="white"
-        hoverShade="600"
-        focusShade="400"
-        // onClick={() => setShowModal(true)}
-        path='/'
-        icon={HomeIcon}
-        name="Home"
-      />
 
-      {/* List with Delete and Edit Buttons */}
-      <ul className="mt-4 space-y-2">
-        {items.map((item, index) => (
-          <li key={index} className="flex items-center space-x-4">
-            <span>{item}</span>
-            <IconButton
-              btnColor="red"
-              btnShade="500"
-              textColor="white"
-              hoverShade="600"
-              focusShade="400"
-              onClick={() => handleDelete(index)}
-              icon={TrashIcon}
-              name="Delete"
-            />
-            <IconButton
-              btnColor="green"
-              btnShade="500"
-              textColor="white"
-              hoverShade="600"
-              focusShade="400"
-              onClick={() => handleEdit(index)}
-              icon={PencilIcon}
-              name="Edit"
-            />
-          </li>
-        ))}
-      </ul>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-         <h2 className="text-xl font-bold mb-4">Modal Title</h2>
-         <p>This is a modal with Tailwind and React!</p>
-       </Modal>
+    <div className="min-h-screen rounded-[20px] bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto justify-center">
+        <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-emerald-700 mb-4">Patients</h1>
+
+
+        <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        </div>
+
+        <IconButton
+          btnColor="emerald"
+          btnShade="500"
+          textColor="white"
+          hoverShade="600"
+          focusShade="400"  
+          path="/admin/users/add"
+          text="Add Patient"
+        />
+        </div>
+
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Users.map((item, index) => (
+            <>
+              <MedCard
+                user={item}
+                Users={Users}
+                onDelete={() => handleDeleteuser(index)}
+                onEdit={() => handleEdit(index)} 
+              />
+              <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                <h2 className="text-xl font-bold mb-4">Detele user</h2>
+                <p>Are you sure you want to delete this user?</p>
+                <IconButton
+                  btnColor="red"
+                  btnShade="500"
+                  textColor="white"
+                  hoverShade="600"
+                  focusShade="400"
+                  onClick={() => handleDelete(index)}
+                  text="Delete" />
+              </Modal>
+            </>
+
+          ))}
+        </div>
+
+        
+      </div>
     </div>
   );
 }
 
-export default Drugs;
-
-
-// import { useState } from "react";
-// import Modal from "../components/shared/modal";
-// import IconButton from '../components/shared/btn';
-// import { HomeIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/solid';
-
-
-// function Drugs() {
-//   const [showModal, setShowModal] = useState(false);
-
-//   return (
-//     <div className="p-4">
-//       {/* <button
-//         onClick={() => setShowModal(true)}
-//         className="bg-blue-500 text-white px-4 py-2 rounded"
-//       >
-//         Open Modal
-//       </button> */}
-
-//       <IconButton
-//         btnColor="blue"
-//         btnShade="500"
-//         textColor="white"
-//         hoverShade="600"
-//         focusShade="400"
-//         onClick={() => setShowModal(true)}
-//         // icon={HomeIcon} // Pass the icon component
-//         name="Home" // Fallback text if no icon
-//       />
-
-//       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-//         <h2 className="text-xl font-bold mb-4">Modal Title</h2>
-//         <p>This is a modal with Tailwind and React!</p>
-//       </Modal>
-//     </div>
-//   );
-// }
-
-// export default Drugs;
+export default Patients;

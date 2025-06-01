@@ -1,15 +1,15 @@
 import React from 'react';
-import OrderCard from './requestCard';
+import RequestCard from './requestCard';
 import { Search, User, Menu, X } from "lucide-react"
 
 import IconButton from '../shared/btn';
 
-export default function OrderList() {
+export default function OrderList({header ,type}) {
   return (
     <div className="min-h-screen rounded-[20px] bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-stretch mb-2">
-          <h1 className="text-3xl font-bold text-emerald-800 mb-4">Requests</h1>
+          <h1 className="text-3xl font-bold text-emerald-800 mb-4">{header}</h1>
           <div className="relative flex items-center ml-auto bg-red">
                 <input
                   type="text"
@@ -20,31 +20,35 @@ export default function OrderList() {
           </div>
         </div>
         <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
-          <OrderCard
+          <RequestCard
             id="1"
+            title={type}
             patientName="John Doe"
             requestDate="11/12/2023"
             status="Pending"
           />
-          <OrderCard
+          <RequestCard
             id="2"
+            title={type}
             patientName="John Doe"
             requestDate="11/12/2023"
             status="Approved"
           />
-          <OrderCard
+          <RequestCard
             id="3"
+            title={type}
             patientName="John Doe"
             requestDate="11/12/2023"
             status="Pending"
           />
-          <OrderCard
+          <RequestCard
             id="4"
+            title={type}
             patientName="John Doe"
             requestDate="11/12/2023"
             status="Rejected"
           />
-          {/* Add more OrderCard components here for additional orders */}
+          {/* Add more RequestCard components here for additional orders */}
         </div>
         {/* <div className="mt-6 flex justify-end">
           <IconButton

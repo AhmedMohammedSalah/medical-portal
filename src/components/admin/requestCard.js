@@ -1,7 +1,7 @@
 import React from 'react';
 
 //patientName requestDate status action(approve/reject)
-function OrderCard({ id, patientName, requestDate, quantity, status }) {
+function RequestCard({ id, title, patientName, requestDate, quantity, status }) {
   // Map status to Tailwind classes for styling
   const statusStyles = {
     Pending: 'bg-yellow-100 text-yellow-800',
@@ -75,7 +75,7 @@ function OrderCard({ id, patientName, requestDate, quantity, status }) {
   return (
     <div className="w-full flex items-center justify-between p-4 rounded-[15px] bg-white border-b border-gray-200 hover:bg-emerald-50 transition-colors duration-200">
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-gray-900">Request #{id}</div>
+        <div className="text-sm font-semibold text-gray-900">{title} #{id}</div>
         <div className="text-sm text-gray-600 truncate">
           <span className="font-medium">Patient:</span> {patientName}
         </div>
@@ -124,4 +124,4 @@ function OrderCard({ id, patientName, requestDate, quantity, status }) {
   );
 }
 
-export default OrderCard;
+export default RequestCard;

@@ -3,7 +3,7 @@ import RequestList from '../components/admin/requestList'
 function RequestsPage() {
   return (
     <div>
-      <RequestList />
+      <RequestList header="Requests" type="Request"/>
     </div>
   );
 }

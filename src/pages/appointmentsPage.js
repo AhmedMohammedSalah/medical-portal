@@ -1,9 +1,10 @@
-function appointmentsPage() {
+import RequestList from '../components/admin/requestList'
+
+function RequestsPage() {
   return (
     <div>
-      <h1>Appointments</h1>
-      <p>Manage your appointments here.</p>
+      <RequestList header="Appointments" type="Appointment"/>
     </div>
   );
 }
-export default appointmentsPage;
+export default RequestsPage;
