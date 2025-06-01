@@ -20,7 +20,7 @@ function Drugs() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-emerald-50">
       <h1 className="text-2xl font-bold">Pharmacy Dashboard</h1>
       
       {/* Home Button */}
