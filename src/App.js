@@ -3,7 +3,10 @@ import Home from './pages/homePage';
 import Drugs from './pages/drugPage';
 import PharmacyList from './pages/pharamcieslist';
 
-// import Login from './pages/loginPage';
+import Login from './pages/login';
+import RegisterPage from './pages/register.js';
+
+
 // import Register from './pages/registerPage';
 // import Dashboard from './pages/dashboardPage';
 // import Drugs from './pages/drugPage'
@@ -21,6 +24,8 @@ function App() {
           <Route path="" element={<Home />} />
         </Route>
         <Route path="/Drugs" element={<Drugs />}/>
+        <Route path="/login" element={<Login />}/>
+        <Route path="/register" element={<RegisterPage />}/>
         <Route path="/pharmacies" element={<PharmacyList />}/>
       </Routes>
     </Router>
