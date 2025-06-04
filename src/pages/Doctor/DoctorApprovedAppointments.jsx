@@ -57,31 +57,50 @@ export default function DoctorAppointments() {
 
   const [patients, setPatients] = useState(initialPatients);
   const [appointments, setAppointments] = useState(initialAppointments);
+  const [patientToRemove, setPatientToRemove] = useState(null);
 
-  const handleRemovePatient = (patientName) => {
+  const [patientStatus, setPatientStatus] = useState({
+    Ahmed: "approved",
+    Sarah: "approved",
+    John: "approved",
+    Lina: "approved",
+    Omar: "approved",
+  });
+
+  const handleRemoveClick = (patient) => {
+    setPatientToRemove(patient);
+  };
+
+  const confirmRemove = () => {
+    if (!patientToRemove) return;
+    const name = patientToRemove.name;
+
     const newAppointments = { ...appointments };
     for (const time in newAppointments) {
       for (const day in newAppointments[time]) {
-        if (newAppointments[time][day] === patientName) {
+        if (newAppointments[time][day] === name) {
           delete newAppointments[time][day];
         }
       }
     }
+
     setAppointments(newAppointments);
+    setPatientToRemove(null);
   };
 
-  const handleStatusChange = (patientName, newStatus) => {
-    console.log(`Status for ${patientName} changed to ${newStatus}`);
-    // optionally update patient state or backend
+  const handleStatusChange = (name, newStatus) => {
+    setPatientStatus((prev) => ({
+      ...prev,
+      [name]: newStatus,
+    }));
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto relative">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-5xl font-bold text-green-700">
         Appointments
         </h1>
-
         <Link
           to="/doctor/scheduler"
           className="flex items-center px-6 py-3 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition"
@@ -92,7 +111,7 @@ export default function DoctorAppointments() {
       </div>
 
       <p className="text-xl text-gray-700 mb-10">
-        This table displays all approved appointments for the current week, categorized by day and time
+        This table displays and manage appointments for the current week, categorized by day and time
       </p>
 
       <div className="overflow-x-auto shadow-2xl rounded-2xl border border-green-200 bg-white">
@@ -122,7 +141,8 @@ export default function DoctorAppointments() {
                       {patient ? (
                         <PatientCard
                           patient={patient}
-                          onRemove={handleRemovePatient}
+                          onRemoveClick={handleRemoveClick}
+                          status={patientStatus[patient.name]}
                           onStatusChange={handleStatusChange}
                         />
                       ) : (
@@ -136,6 +156,32 @@ export default function DoctorAppointments() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal for confirming delete */}
+      {patientToRemove && (
+  <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-xl shadow-lg max-w-md w-full text-center border border-gray-200">
+      <p className="text-lg font-semibold text-gray-800 mb-4">
+        Are you sure you want to remove {patientToRemove.name}'s appointment?
+      </p>
+      <div className="flex justify-center gap-4">
+        <button
+          onClick={confirmRemove}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Yes, Remove
+        </button>
+        <button
+          onClick={() => setPatientToRemove(null)}
+          className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
