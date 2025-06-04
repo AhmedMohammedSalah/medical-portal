@@ -1,5 +1,5 @@
-
 import { useState } from "react"
+import { Link, useLocation } from "react-router-dom"
 import {
   Home,
   Calendar,
@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 
 const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
-  const [activeItem, setActiveItem] = useState("dashboard")
+  const location = useLocation()
 
   const getMenuItems = () => {
     switch (userRole) {
@@ -31,8 +31,8 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
       case "doctor":
         return [
           { id: "dashboard", label: "Dashboard", icon: Home, href: "/doctor/dashboard" },
-          { id: "calendar", label: "My Calendar", icon: Calendar, href: "/doctor/calendar" },
-          { id: "appointments", label: "Appointments", icon: ClipboardList, href: "/doctor/appointments" },
+          { id: "calendar", label: "Manage Time", icon: Calendar, href: "/doctor/scheduler" },
+          { id: "appointments", label: "Appointments", icon: ClipboardList, href: "/doctor/appointments/view" },
           { id: "profile", label: "My Profile", icon: User, href: "/doctor/profile" },
           { id: "settings", label: "Settings", icon: Settings, href: "/doctor/settings" },
         ]
@@ -55,7 +55,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
       case "admin":
         return "bg-red-600"
       case "doctor":
-        return "bg-blue-600"
+        return "bg-green-500"
       case "patient":
       default:
         return "bg-emerald-600"
@@ -99,16 +99,12 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon
-            const isActive = activeItem === item.id
+            const isActive = location.pathname.startsWith(item.href)
 
             return (
               <li key={item.id}>
-                <a
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setActiveItem(item.id)
-                  }}
+                <Link
+                  to={item.href}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive ? `${getRoleColor()} text-white` : "text-gray-600 hover:bg-gray-100"
                   }`}
@@ -116,7 +112,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
                   {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                </a>
+                </Link>
               </li>
             )
           })}

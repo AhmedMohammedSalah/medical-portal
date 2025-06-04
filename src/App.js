@@ -4,14 +4,14 @@ import Home from './pages/homePage';
 
 // import Register from './pages/registerPage';
 // import Dashboard from './pages/dashboardPage';
-// import Drugs from './pages/drugPage'
 import DefaultLayout from './components/layout/default-layout';
-import AppointmentDetails from './components/appointments/AppointmentDetails.jsx';
-import AppointmentDetailsPage from './pages/appointments/DoctorDetails.jsx';
 import DoctorLayout from './components/layout/doctor-layout.jsx';
 import PatientLayout from './components/layout/patient-layout.jsx';
 import DoctorDetails from './pages/appointments/DoctorDetails.jsx';
 import PatientDetails from './pages/appointments/PatientDetails.jsx';
+import DoctorTimeScheduler from './pages/Doctor/DoctorTimeScheduler.jsx'
+import DoctorApprovedAppointments from './pages/Doctor/DoctorApprovedAppointments.jsx'
+import DoctorDashboard from './pages/Doctor/DoctorDashboard.jsx';
 // import IconButton from './components/shared/iconButton';     
 
 
@@ -19,21 +19,39 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* [AMS] this is default layout for guest / client */}
+
+        {/* [AMS] default layout for guest */}
         <Route path="/" element={<DefaultLayout />}>
+
           {/*[AMS] any route here will have auto header and footer */}
           <Route path="" element={<Home />} />
+
         </Route>
-        {/*[ams] Doctor layout */}
+
+
+        {/*[AMS]: Doctor layout */}
         <Route path="/doctor" element={<DoctorLayout />}>
-          {/*[AMS] any route here will have auto header and footer and doctor side bar */}
+
+          {/* [SENU]: doctor dashboard */}
+          <Route path='dashboard/' element={<DoctorDashboard/>}/>
+
+          {/* [SENU]: doctor view aproved appointments */}
+          <Route path='appointments/view' element={<DoctorApprovedAppointments/>}/>
+
+          {/*[AMS]: any route here will have auto header and footer and doctor side bar */}
           <Route path="appointments/:id" element={<DoctorDetails />} />
+
+          {/* [SENU]: doctor time scheduler page route */}
+          <Route path='scheduler/' element={<DoctorTimeScheduler/>}/>
+
         </Route>
+
         {/* [AMS] Patient layout */}
         <Route path="/patient" element={<PatientLayout />}>
           {/*[AMS] any route here will have auto header and footer and patient side bar */}
           <Route path="appointments/:id" element={<PatientDetails />} />
         </Route>
+
       </Routes>
     </Router>
   );
