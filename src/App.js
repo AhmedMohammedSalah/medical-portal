@@ -61,7 +61,7 @@ function App() {
         </Route>
 
 
-        {/* [AMS]=> 🙂 amira 404  must be at the end of routes */}
+        {/* [AMS]=> 🙂- amira 404  must be at the end of routes */}
         <Route path="*" element={<NotFound />}/>
 
       </Routes>
