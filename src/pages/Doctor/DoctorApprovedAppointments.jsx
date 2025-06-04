@@ -58,6 +58,8 @@ export default function DoctorAppointments() {
   const [patients, setPatients] = useState(initialPatients);
   const [appointments, setAppointments] = useState(initialAppointments);
   const [patientToRemove, setPatientToRemove] = useState(null);
+  const [cancelReason, setCancelReason] = useState("The doctor is sorry, but due to an unexpected situation, the appointment has to be cancelled.");
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   const [patientStatus, setPatientStatus] = useState({
     Ahmed: "approved",
@@ -105,7 +107,7 @@ export default function DoctorAppointments() {
           to="/doctor/scheduler"
           className="flex items-center px-6 py-3 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition"
         >
-          Go To Pending Patients
+          Manage your Available Time
           <ChevronRight className="ms-2 w-8 h-8" />
         </Link>
       </div>
@@ -160,10 +162,22 @@ export default function DoctorAppointments() {
       {/* Modal for confirming delete */}
       {patientToRemove && (
   <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded-xl shadow-lg max-w-md w-full text-center border border-gray-200">
-      <p className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="bg-white p-6 rounded-xl shadow-lg max-w-md w-full border border-gray-200">
+
+      {/* TEXT-MODAL */}
+      <p className="text-center text-lg font-semibold text-gray-800 mb-4">
         Are you sure you want to remove {patientToRemove.name}'s appointment?
       </p>
+
+      {/* INPUT */}
+      <label className="font-semibold">Cancellation Reason</label>
+      <textarea
+        value={cancelReason}
+        onChange={(e) => setCancelReason(e.target.value)}
+        className="w-full h-20 border border-gray-300 rounded-md p-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none mb-5"
+    />
+
+      {/* BUTTONS */}
       <div className="flex justify-center gap-4">
         <button
           onClick={confirmRemove}
