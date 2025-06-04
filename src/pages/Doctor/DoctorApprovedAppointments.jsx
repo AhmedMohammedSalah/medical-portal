@@ -1,6 +1,7 @@
-import React from "react";
-import { UserRound, ChevronRight } from "lucide-react";
+import React, { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import PatientCard from "../../components/DoctorAppointment/PatientCard";
 
 export default function DoctorAppointments() {
   const headCellClass =
@@ -11,8 +12,7 @@ export default function DoctorAppointments() {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const timeSlots = ["9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM"];
 
-  // Dummy patient data with name, age, and image
-  const patients = {
+  const initialPatients = {
     Ahmed: {
       name: "Ahmed",
       age: 32,
@@ -40,7 +40,7 @@ export default function DoctorAppointments() {
     },
   };
 
-  const appointments = {
+  const initialAppointments = {
     "9:00 AM": {
       Monday: "Ahmed",
       Wednesday: "Sarah",
@@ -55,43 +55,41 @@ export default function DoctorAppointments() {
     "12:00 PM": {},
   };
 
-  const renderPatientCard = (patientName) => {
-    const patient = patients[patientName];
-    if (!patient) return "-";
+  const [patients, setPatients] = useState(initialPatients);
+  const [appointments, setAppointments] = useState(initialAppointments);
 
-    return (
-      <div className="group bg-green-50 hover:bg-green-100 p-3 rounded-xl shadow transition-transform duration-300 transform hover:scale-105 flex items-center gap-3 justify-center flex-col">
-        <img
-          src={patient.image}
-          alt={patient.name}
-          className="w-16 h-16 rounded-full object-cover border-2 border-green-300 shadow"
-        />
-        <div className="text-center">
-          <p className="text-green-700 font-semibold text-lg flex items-center justify-center gap-1">
-            <UserRound className="w-4 h-4" /> {patient.name}
-          </p>
-          <p className="text-sm text-gray-600">Age: {patient.age}</p>
-        </div>
-      </div>
-    );
+  const handleRemovePatient = (patientName) => {
+    const newAppointments = { ...appointments };
+    for (const time in newAppointments) {
+      for (const day in newAppointments[time]) {
+        if (newAppointments[time][day] === patientName) {
+          delete newAppointments[time][day];
+        }
+      }
+    }
+    setAppointments(newAppointments);
+  };
+
+  const handleStatusChange = (patientName, newStatus) => {
+    console.log(`Status for ${patientName} changed to ${newStatus}`);
+    // optionally update patient state or backend
   };
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-
-        <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-5xl font-bold text-green-700">
-            Approved Appointments
+        Appointments
         </h1>
 
         <Link
-            to="/doctor/scheduler"
-            className="flex items-center px-6 py-3 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition"
+          to="/doctor/scheduler"
+          className="flex items-center px-6 py-3 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition"
         >
-            Go To Pending Patients
-            <ChevronRight className="ms-2 w-8 h-8" />
+          Go To Pending Patients
+          <ChevronRight className="ms-2 w-8 h-8" />
         </Link>
-        </div>
+      </div>
 
       <p className="text-xl text-gray-700 mb-10">
         This table displays all approved appointments for the current week, categorized by day and time
@@ -115,13 +113,24 @@ export default function DoctorAppointments() {
                 <td className={`${valueCellClass} font-bold text-green-800`}>
                   {time}
                 </td>
-                {days.map((day) => (
-                  <td key={day} className={valueCellClass}>
-                    {appointments[time]?.[day]
-                      ? renderPatientCard(appointments[time][day])
-                      : "-"}
-                  </td>
-                ))}
+                {days.map((day) => {
+                  const patientName = appointments[time]?.[day];
+                  const patient = patients[patientName];
+
+                  return (
+                    <td key={day} className={valueCellClass}>
+                      {patient ? (
+                        <PatientCard
+                          patient={patient}
+                          onRemove={handleRemovePatient}
+                          onStatusChange={handleStatusChange}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
