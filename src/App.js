@@ -53,11 +53,11 @@ function App() {
         {/* [AMS] Patient layout */}
         <Route path="/patient" element={<PatientLayout />}>
           {/*[AMS] any route here will have auto header and footer and patient side bar */}
-          <Route path="appointments/:id" element={<PatientDetails />} />
-        <Route path="/patientlist" element={<PatientlistDoctor />}/>
-        <Route path="/book" element={<BookAppointmentModal />}/>
-        <Route path="/patientprofile" element={<PatientProfile />}/>
-        <Route path="/appointment" element={<MyAppointments />}/>
+            <Route path="appointments/:id" element={<PatientDetails />} />
+            <Route path="patientlist" element={<PatientlistDoctor />}/>
+            <Route path="book" element={<BookAppointmentModal />}/>
+            <Route path="patientprofile" element={<PatientProfile />}/>
+            <Route path="appointment" element={<MyAppointments />}/>
         </Route>
 
 
