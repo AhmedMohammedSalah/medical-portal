@@ -17,7 +17,8 @@ import DoctorTimeScheduler from './pages/Doctor/DoctorTimeScheduler.jsx'
 import DoctorApprovedAppointments from './pages/Doctor/DoctorApprovedAppointments.jsx'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard.jsx';
 // import IconButton from './components/shared/iconButton';     
-
+import LoginPage from './pages/login.js';
+import RegisterPage from './pages/register.js';
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
 
           {/*[AMS] any route here will have auto header and footer */}
           <Route path="" element={<Home />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
 
         </Route>
 
