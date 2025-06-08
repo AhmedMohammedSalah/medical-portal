@@ -1,7 +1,7 @@
 import React from "react";
 
 // COMPONENT:=> GENERAL INPUT FIELD WITH LABEL
-export default function InputField({ label, type = "text", placeholder, noLabel = false, value, onChange, error }) {
+export default function InputField({ label, type = "text", placeholder, noLabel = false, value, onChange, error ,name}) {
   return (
     <div className="flex flex-col">
 
@@ -11,6 +11,7 @@ export default function InputField({ label, type = "text", placeholder, noLabel 
       {/* INPUT */}
       <input
         type={type}
+        name={name} 
         placeholder={placeholder}
         value={value}
         onChange={onChange}

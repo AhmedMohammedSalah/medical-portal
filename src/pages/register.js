@@ -1,21 +1,17 @@
-import React, { useState } from "react";
-import FormWrapper from "../components/shared/FormWrapper.js";
-import InputField from "../components/shared/InputField.js";
-import BigBtn from "../components/shared/BigBtn.js";
-import DropdownList from "../components/shared/DropdownList.js";
-import { validateRegisterForm } from "../utils/validation.js";
-import {Link} from "react-router-dom"       
-
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../features/authSlice";
+import FormWrapper from "../components/shared/FormWrapper";
+import InputField from "../components/shared/InputField";
+import BigBtn from "../components/shared/BigBtn";
+import DropdownList from "../components/shared/DropdownList";
+import { validateRegisterForm } from "../utils/validation";
+import { Link } from "react-router-dom";
+import Spinner from "../components/shared/Spinner";
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
-  const [gender, setGender] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [idImage, setIdImage] = useState(null);
-  const [errors, setErrors] = useState({
+  const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     role: "",
@@ -23,26 +19,54 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  const [idImage, setIdImage] = useState(null);
+  const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
 
   const roleOptions = [
-    { id: "Patient", name: "Patient" },
-    { id: "Doctor", name: "Doctor" },
+    { id: "patient", name: "Patient" },
+    { id: "doctor", name: "Doctor" },
   ];
 
-  const submit = (e) => {
-    e.preventDefault();
-    const { valid, errors } = validateRegisterForm({
-      fullName,
-      email,
-      role,
-      gender,
-      password,
-      confirmPassword,
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { valid, errors } = validateRegisterForm(formData);
     setErrors(errors);
-    if (valid) {
-      alert("Form submitted successfully!");
-    }
+    
+      console.log("Form is valid, proceeding with registration...");
+      try {
+        // Prepare form data for submission
+        const userData = new FormData();
+        userData.append("name", formData.fullName);
+        userData.append("email", formData.email);
+        userData.append("password", formData.password);
+        userData.append("role", formData.role);
+
+        if (formData.role === "doctor" && idImage) {
+          userData.append("id_image", idImage);
+        }
+
+        // Dispatch register action
+        const result = await dispatch(registerUser(userData));
+        console.log("Registration result:", result);
+        if ( registerUser.fulfilled.match( result ) ) {
+          
+          navigate("/login"); // Redirect to email verification notice
+        }
+      } catch (err) {
+        console.error("Registration error:", err);
+      }
+    
   };
 
   return (
@@ -51,58 +75,70 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold text-center">Register</h1>
         <h2 className="text-xl font-semibold text-center mb-4">Your Account</h2>
         <p className="text-center text-gray-500 text-sm mb-6">
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit.<br />
-          Sit aliquid, Non distinctio vel iste.
+          Create your account to get started
         </p>
 
-        <FormWrapper className="space-y-4" onSubmit={submit}>
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        <FormWrapper className="space-y-4" onSubmit={handleSubmit}>
           <InputField
             label="Full Name"
+            name="fullName"
             type="text"
             placeholder="Enter your full name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={formData.fullName}
+            onChange={handleChange}
             error={errors.fullName}
           />
 
           <InputField
             label="Email"
+            name="email"
             type="email"
             placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleChange}
             error={errors.email}
           />
 
           <InputField
             label="Password"
+            name="password"
             type="password"
             placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             error={errors.password}
           />
 
           <InputField
             label="Confirm Password"
+            name="confirmPassword"
             type="password"
             placeholder="Re-enter your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={formData.confirmPassword}
+            onChange={handleChange}
             error={errors.confirmPassword}
           />
 
           <DropdownList
             label="Role"
+            name="role"
             options={roleOptions}
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
+            value={formData.role}
+            onChange={handleChange}
             error={errors.role}
           />
 
-          {role === "Doctor" && (
+          {formData.role === "doctor" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Upload ID Image</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Upload ID Image
+              </label>
               <input
                 type="file"
                 accept="image/*"
@@ -116,33 +152,29 @@ export default function RegisterPage() {
             <label className="flex items-start gap-2">
               <input type="checkbox" required />
               <span>
-                I consent to Herbal processing my personal data in order to send personalized
-                marketing material in accordance with the consent form and the privacy policy.
-              </span>
-            </label>
-            <label className="flex items-start gap-2 mt-2">
-              <input type="checkbox" required />
-              <span>
-                By clicking "Create account", I consent to the privacy policy.
+                I consent to processing my personal data in accordance with the
+                privacy policy.
               </span>
             </label>
           </div>
 
-          <BigBtn text="CREATE ACCOUNT" onClick={submit} className="w-full bg-[#0A9A73] text-white hover:bg-[#08825f]" />
+          <BigBtn
+            text={loading ? <Spinner /> : "CREATE ACCOUNT"}
+            onClick={handleSubmit}
+            className="w-full bg-[#0A9A73] text-white hover:bg-[#08825f]"
+            disabled={loading}
+          />
 
-          <p className="text-xs text-center text-gray-500 mt-4">
-            By creating an account, you agree to our:
-          </p>
           <div className="flex justify-center gap-4 text-sm underline text-gray-600">
             <a href="#">TERMS OF CONDITIONS</a>
             <a href="#">PRIVACY POLICY</a>
           </div>
-            <Link  to="/login"> 
-            <a className="text-center text-sm text-gray-700 mt-4">
-                ALREADY HAVE AN ACCOUNT ?
-            </a>
-           </Link>
 
+          <Link to="/login" className="text-center text-sm text-gray-700 mt-4 block">
+            
+              ALREADY HAVE AN ACCOUNT?
+            
+          </Link>
         </FormWrapper>
       </div>
     </div>
