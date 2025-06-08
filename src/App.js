@@ -13,7 +13,7 @@ import DoctorLayout from './components/layout/doctor-layout.jsx';
 import PatientLayout from './components/layout/patient-layout.jsx';
 import DoctorDetails from './pages/appointments/DoctorDetails.jsx';
 import PatientDetails from './pages/appointments/PatientDetails.jsx';
-import DoctorTimeScheduler from './pages/Doctor/DoctorTimeScheduler.jsx'
+import DoctorTimeScheduler from './pages/Doctor/DoctorTimeScheduler/DoctorTimeScheduler.jsx'
 import DoctorApprovedAppointments from './pages/Doctor/DoctorApprovedAppointments.jsx'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard.jsx';
 // import IconButton from './components/shared/iconButton';     
@@ -54,10 +54,10 @@ function App() {
         <Route path="/patient" element={<PatientLayout />}>
           {/*[AMS] any route here will have auto header and footer and patient side bar */}
           <Route path="appointments/:id" element={<PatientDetails />} />
-        <Route path="/patientlist" element={<PatientlistDoctor />}/>
-        <Route path="/book" element={<BookAppointmentModal />}/>
-        <Route path="/patientprofile" element={<PatientProfile />}/>
-        <Route path="/appointment" element={<MyAppointments />}/>
+        <Route path="patientlist" element={<PatientlistDoctor />}/>
+        <Route path="book" element={<BookAppointmentModal />}/>
+        <Route path="patientprofile" element={<PatientProfile />}/>
+        <Route path="appointment" element={<MyAppointments />}/>
         </Route>
 
 

@@ -1,5 +1,14 @@
 // IMPORT REACT AND ICONS
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import LoadingOverlay from "../../../components/shared/LoadingOverlay";
+
+import {
+  getDays,
+  isTimeOverlap,
+  getHourlyTimesBasedOnRange
+} from "./utils";
+
 import {
   Calendar,
   Clock,
@@ -10,49 +19,32 @@ import {
   ChevronRightCircle,
 } from "lucide-react";
 
+
+
 // DEFINE DAYS
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-// GET DAYS IN RANGE
-function getDays(fromDay, toDay) {
-  const fromIndex = days.indexOf(fromDay);
-  const toIndex = days.indexOf(toDay);
-  return days.slice(fromIndex, toIndex + 1);
-}
-
-// TIME STRING TO MINUTES
-const toMinutes = (timeStr) => {
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  return hours * 60 + minutes;
+// [SENU]: I know it can be better
+const dayMap = {
+  Monday: "mon",
+  Tuesday: "tue",
+  Wednesday: "wed",
+  Thursday: "thu",
+  Friday: "fri",
+  Saturday: "sat",
+  Sunday: "sun"
 };
 
-// CHECK IF TIMES OVERLAP
-function isTimeOverlap(existSlot, newSlot) {
-  const existingFrom = toMinutes(existSlot.from);
-  const existingTo = toMinutes(existSlot.to);
-  const newFrom = toMinutes(newSlot.fromTime);
-  const newTo = toMinutes(newSlot.toTime);
-  return newFrom < existingTo && newTo > existingFrom;
-}
 
-// GET HOURLY TIMES (EX: 09:00 TO 12:00 → 3 SLOTS)
-function getHourlyTimesBasedOnRange([fromTime, toTime]) {
-  const result = [];
-  const toTimeString = (minutes) => {
-    const h = Math.floor(minutes / 60).toString().padStart(2, "0");
-    const m = (minutes % 60).toString().padStart(2, "0");
-    return `${h}:${m}`;
-  };
-  const start = toMinutes(fromTime);
-  const end = toMinutes(toTime);
-  for (let min = start; min < end; min += 60) {
-    result.push({ from: toTimeString(min), to: toTimeString(min + 60) });
-  }
-  return result;
-}
+//=DOCTOR ID SIMULATION==
+const doctor_id = 4; 
+//=======================
+
+
 
 // MAIN COMPONENT
 export default function WeeklyScheduler() {
+
   // STATE
   const [slots, setSlots] = useState({});
   const [useRange, setUseRange] = useState(false);
@@ -63,6 +55,57 @@ export default function WeeklyScheduler() {
   const [toast, setToast] = useState("");
   const [toastType, setToastType] = useState("error");
 
+  // [SENU]:❤️ STATE FOR LOADING------------------
+  const [loading, setLoading] = useState(false);
+  //----------------------------------------------
+
+
+
+
+  // ON MOUNT:
+  useEffect(()=>{
+
+    const fetchAppointments = async () => {
+
+      setLoading(true); //[SENU]: ❤️ START LOADING
+  
+      try {
+        const response = await axios.get(`http://localhost:8000/appointments/?doctor_id=${doctor_id}`);
+        const appointments = response.data;
+  
+        // Transform appointments into frontend format
+        const slotsByDay = {};
+  
+        appointments.forEach((appt) => {
+          // Convert backend format (e.g., "mon") to "Monday"
+          const day = Object.keys(dayMap).find(key => dayMap[key] === appt.day);
+          if (!day) return; // skip unknown days
+  
+          if (!slotsByDay[day]) {
+            slotsByDay[day] = [];
+          }
+  
+          slotsByDay[day].push({
+            id: appt.id,
+            from: appt.from_time,
+            to: appt.to_time,
+          });
+        });
+  
+        setSlots(slotsByDay); // update state with formatted data
+  
+      } catch (err) {
+        console.error("Failed to fetch appointments", err);
+        showToast("Failed to load appointments");
+      } finally {
+        setLoading(false); //[SENU]: ❤️ STOP LOADING
+      }
+    };
+  
+    fetchAppointments();
+
+  }, [])
+
   // SHOW TOAST
   const showToast = (message, type = "error") => {
     setToast(message);
@@ -70,47 +113,164 @@ export default function WeeklyScheduler() {
     setTimeout(() => setToast(""), 3000);
   };
 
-  // ADD NEW SLOT
-  const addSlot = () => {
-    const newSlots = { ...slots };
-    const duration = toMinutes(toTime) - toMinutes(fromTime);
+// ADD NEW SLOTS
+const addSlot = async () => {
 
-    if (duration <= 0 || duration % 60 !== 0) {
-      return showToast("Time range must be > 0 and divisible by 60 mins");
-    }
 
-    const selectedDays = useRange ? getDays(fromDay, toDay) : [fromDay];
-    let hasOverlap = false;
+  //[SENU]
+  // ❤️ BEGIN LOADING 
+  setLoading(true);
 
-    selectedDays.forEach((day) => {
-      if (!newSlots[day]) newSlots[day] = [];
-      const newSlot = { fromTime, toTime };
-      const overlapping = newSlots[day].find((slot) => isTimeOverlap(slot, newSlot));
+
+  // VARIABLES----------
+  let hasOverlap = false;
+  const newSlots = { ...slots };
+  const appointmentsToCreate = [];
+  const selectedDays = useRange ? getDays(fromDay, toDay) : [fromDay];
+
+  // SEGMENT THE TIME RANGE INTO HOURS
+  const timeSegments = getHourlyTimesBasedOnRange([fromTime, toTime]);
+
+  // VALIDATION-----------------------------
+  if (timeSegments.length === 0) {
+    setLoading(false); //[SENU]❤️ STOP LOADING
+    return showToast("Time range must be > 0 and divisible by 60 mins");
+  }
+
+  // LOOP ON SELECTED DAYS========================================================
+  selectedDays.forEach((day) => {
+
+    // INIT NON-SELECTED DAYS WITH EMPTY
+    if (!newSlots[day]) newSlots[day] = [];
+
+    // LOOP ON THE TIME RANGE:
+    timeSegments.forEach(({from, to}) => {
+
+      // MAKE NEW OBJECT
+      const newSlot = { fromTime: from, toTime: to };
+
+      // VALIDATION: CHECK OVERLAPPING-----------------
+      const overlapping = newSlots[day].find((slot) =>
+        isTimeOverlap(slot, newSlot)
+      );
+
       if (overlapping) {
         hasOverlap = true;
       } else {
-        newSlots[day].push({ from: fromTime, to: toTime });
+        // PUSH TO SLOTS (FRONTEND)
+        // newSlots[day].push({ from, to });
+
+        // [SENU]: MOST IMPORTANT PART
+        appointmentsToCreate.push({
+          doctor_id,               // SIMULATED
+          day: dayMap[day],        // BACKEND FORMAT
+          from_time: from,
+          to_time: to,
+        });
       }
     });
 
-    if (hasOverlap) {
-      return showToast(`Slot ${fromTime} - ${toTime} overlaps with existing`);
-    }
+  }); //===========================================================================
 
+  // IF OVERLAP DETECTED
+  if (hasOverlap) {
+    setLoading(false); //[SENU] ❤️ STOP LOADING
+    return showToast(`Slot ${fromTime} - ${toTime} overlaps with existing`);
+  }
+
+  // SAVE SLOTS
+  try {
+
+    // PRINTING THE NEW SLOTS MADE
+    console.log("new slots = ", newSlots);
+
+    // PRINTING THE BACKEND OBJECTS
+    console.log("appointments to create = ", appointmentsToCreate);
+
+    // SEND TO BACKEND
+    const response = await axios.post("http://localhost:8000/appointments/", appointmentsToCreate);
+    const savedAppointments = response.data;
+
+    // MERGE BACK: use returned IDs from backend==============================
+    savedAppointments.forEach((appt) => {
+
+      const day = Object.keys(dayMap).find((key) => dayMap[key] === appt.day);
+      if (!newSlots[day]) newSlots[day] = [];
+
+      newSlots[day].push({
+        id: appt.id,
+        from: appt.from_time,
+        to: appt.to_time,
+      });//====================================================================
+
+    });
+
+    
+    // DEBUG:
+    console.log("newSlots = ", newSlots)
+
+    // SET FRONTEND STATE
     setSlots(newSlots);
+
+    //[SENU]❤️ STOP LOADING
+    setLoading(false);
+   
+
     showToast(`Slot ${fromTime} - ${toTime} added`, "success");
-  };
+
+  } catch (err) {
+    console.error(err);
+
+    //[SENU]❤️ STOP LOADING
+    setLoading(false);
+    showToast("Backend error: could not save appointments");
+  }
+};
+
+
+
+
+
 
   // DELETE SLOT
-  const removeSlot = (day, slotIndex) => {
-    setSlots((prev) => {
-      const updated = { ...prev };
-      updated[day] = updated[day].filter((_, i) => i !== slotIndex);
-      if (updated[day].length === 0) delete updated[day];
-      return updated;
-    });
-  };
+  const removeSlot = async (day, slotIndex) => {
 
+    setLoading(true); //[SENU]❤️ START LOADING
+  
+    const slotToDelete = slots[day][slotIndex];
+    // console.log("slotIndex = ", slotIndex)
+    // console.log("the slot i intend to delete = ", slotToDelete)
+  
+    try {
+      // BACKEND REMOVE
+      await axios.delete(`http://localhost:8000/appointments/${slotToDelete.id}/`);
+  
+      // FRONTEND REMOVE
+      setSlots((prev) => {
+        const updated = { ...prev };
+        updated[day] = updated[day].filter((_, i) => i !== slotIndex);
+        if (updated[day].length === 0) delete updated[day];
+        return updated;
+      });
+  
+      showToast("Slot removed successfully", "success");
+
+    } 
+    // FAILED
+    catch (error) {
+      console.error(error);
+      showToast("Failed to delete slot", "error");
+    } 
+
+    finally {
+      setLoading(false); //[SENU]❤️ STOP LOADING
+    }
+  };
+  
+
+
+
+  
   // CALCULATE TOTAL APPOINTMENTS IN ONE DAY
   const getTotalAppointments = (day) => {
     const slotsInDay = slots[day] || [];
@@ -123,6 +283,10 @@ export default function WeeklyScheduler() {
   // UI
   return (
     <div className="p-10 max-w-6xl mx-auto text-lg">
+
+      {/* ❤️ LOADING */}
+      {loading && <LoadingOverlay />}
+
       {/* HEADER */}
       <h1 className="text-4xl font-bold mb-6 text-green-700 flex items-center gap-3">
         <Calendar className="w-8 h-8" />
@@ -252,6 +416,7 @@ export default function WeeklyScheduler() {
                             <ChevronRightCircle className="w-5 h-5" />
                             {slot.from} - {slot.to}
                           </div>
+
                           <button
                             onClick={() => removeSlot(day, index)}
                             className="text-red-600 hover:text-red-800 transition"
