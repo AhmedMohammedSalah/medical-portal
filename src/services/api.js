@@ -25,6 +25,28 @@ api.interceptors.request.use(
   }
 );
 
+const apiFileUpload = axios.create({
+  baseURL: "http://localhost:8000/",
+  timeout: 30000, // Longer timeout for file uploads
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "multipart/form-data",
+  },
+});
+
+// Apply the same interceptors to the file upload instance
+apiFileUpload.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 // Response interceptor
 // api.interceptors.response.use(
 //   (response) => response,
@@ -84,7 +106,7 @@ const apiEndpoints = {
     updateDoctorProfile: (data) => api.put("doctors/doctors/me", data),
   },
   users: {
-    register: (userData) => api.post("users/", userData),
+    register: (userData) => apiFileUpload.post("users/", userData),
     getCurrentUser: () => api.get("users/me/"),
     updateUser: (userData) => api.patch("users/me/", userData),
     deleteUser: () => api.delete("users/me/"),
