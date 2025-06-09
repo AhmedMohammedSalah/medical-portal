@@ -388,29 +388,29 @@ const addSlot = async () => {
       </div>
 
       {/* TABLE */}
-      <div className="overflow-auto border border-gray-300 rounded-xl shadow-xl">
+      <div className="overflow-auto border border-green-300 rounded-xl shadow-xl">
         <table className="w-full text-left border-collapse text-lg">
           <thead>
             <tr className="bg-green-100 text-green-800">
-              <th className="border border-gray-300 px-5 py-4">Day</th>
-              <th className="border border-gray-300 px-5 py-4">Time Slots</th>
-              <th className="border border-gray-300 px-5 py-4">Expected Appointments</th>
-              <th className="border border-gray-300 px-5 py-4 text-center">Total</th>
+              <th className="border border-green-300 px-5 py-4">Day</th>
+              <th className="border border-green-300 px-5 py-4">Time Slots</th>
+              <th className="border border-green-300 px-5 py-4">Expected Appointments</th>
+              <th className="border border-green-300 px-5 py-4 text-center">Total</th>
             </tr>
           </thead>
           <tbody>
             {days.map((day) => (
               <tr key={day} className="bg-white even:bg-gray-50">
-                <td className="border border-gray-300 px-5 py-4 font-semibold">{day}</td>
+                <td className="border border-green-300 px-5 py-4 font-semibold">{day}</td>
 
                 {/* SLOT LIST */}
-                <td className="border border-gray-300 px-5 py-4">
+                <td className="border border-green-300 px-5 py-4">
                   {slots[day]?.length > 0 ? (
                     <div className="space-y-2">
                       {slots[day].map((slot, index) => (
                         <div
                           key={index}
-                          className="flex justify-between items-center bg-green-50 border border-gray-200 px-4 py-3 rounded-lg shadow hover:bg-green-100 transition"
+                          className="flex justify-between items-center bg-green-50 border border-green-200 px-4 py-3 rounded-lg shadow hover:bg-green-100 transition"
                         >
                           <div className="flex items-center gap-2 text-green-700 font-semibold">
                             <ChevronRightCircle className="w-5 h-5" />
