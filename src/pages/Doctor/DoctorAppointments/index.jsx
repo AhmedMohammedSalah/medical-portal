@@ -8,9 +8,7 @@ import { initialAppointments, initialPatients } from "./mocData";
 import axios from "axios";
 import LoadingOverlay from './../../../components/shared/LoadingOverlay'
 
-
 export default function DoctorAppointments() {
-
 
     /*
     APPOINTMENTS
@@ -23,7 +21,6 @@ export default function DoctorAppointments() {
         KEYS: ID,
         VALUE: {NAME ,AGE , IMG}
      */
-
 
     /*
     [LOGIC]--------------------------------------------------------------------
@@ -41,10 +38,18 @@ export default function DoctorAppointments() {
     ----------------------------------------------------------------------------
     */
 
+    /*
+    HOW THE STATUS IN THE CARDS INITIATED: [IT INIATED CORRECTLY]
+    --------------------------------------------------------------
 
+
+    HOW WE UPDATE IT HERE
+    ---------------------
+    */
 
     // [SENU] ❤️ LOADING
     const [loading, setLoading] = useState(false)
+    const [loadingAppointments, setLoadingAppointments] = useState({}) // Track loading per appointment
 
     // PATEINTS - APPOINTMENTS STATES
     const [patients, setPatients] = useState(initialPatients);
@@ -54,7 +59,7 @@ export default function DoctorAppointments() {
     // STATES FOR UPDATES
     const [patientToRemove, setPatientToRemove] = useState(null);
     const [cancelReason, setCancelReason] = useState("The doctor is sorry, but due to an unexpected situation, the appointment has to be cancelled.");
-    const [patientStatus, setPatientStatus] = useState( Object.fromEntries(Object.keys(initialPatients).map(name => [name, "approved"])));
+    const [patientStatus, setPatientStatus] = useState({});
 
     // DAY MAPPER
     const dayMap = {
@@ -66,13 +71,10 @@ export default function DoctorAppointments() {
       sat: "Saturday",
       sun: "Sunday"
     };
-    
-    
 
     useEffect(() => { //ON MOUNT
         const fetchData = async () => {
           try {
-
             // ❤️ START LOADING
             setLoading(true)
 
@@ -80,18 +82,18 @@ export default function DoctorAppointments() {
             const res = await axios.get("http://localhost:8000/appointments/?not_reserve_status=available");
             const data = res.data;
             console.log("appointments data = ", data)
-      
+
             // CONTAINERS
             const structuredAppointments = {};
             const structuredPatients = {};
             const fetchedTimeSlots = []
+            const statusMap = {};
 
             // LOOP ON FETCHED APPOINTMENTS
-            for (const { from_time, day, patient } of data) {
-
+            for (const { from_time, day, patient, id, reserve_status } of data) {
               // CONVERT DAY
               const dayname = dayMap[day]
-              
+
               // APPTS
               if (!structuredAppointments[from_time]) structuredAppointments[from_time] = {};
               structuredAppointments[from_time][dayname] = patient.patient_id;
@@ -100,36 +102,41 @@ export default function DoctorAppointments() {
               // PATIENT:
               const age = new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear();
               structuredPatients[patient.patient_id] = {
+                appointment_id: id,
+                appointment_reserve_status: reserve_status,
+                patient_id: patient.patient_id,
                 name: patient.name,
                 age,
                 patient_image_path: patient.patient_image_path,
               };
               console.log("structuredPatients = ", structuredPatients)
 
+              // STATUS
+              statusMap[patient.patient_id] = reserve_status;
+
               // TIME SLOTS
               fetchedTimeSlots.push(from_time)
-
-
             }
-      
+
+            console.log("from useEffect: structured patients = ", structuredPatients)
+
             // UPDATE STATES
             setAppointments(structuredAppointments);
             setPatients(structuredPatients);
             setTimeSlots(fetchedTimeSlots)
+            setPatientStatus(statusMap);
           } catch (err) {
             console.error("Failed to fetch appointments:", err);
-          } finally{
+          } finally {
             setLoading(false) // 💔 STOP LOADING
           }
         };
-      
+
         fetchData();
       }, []);
-      
-      
+
     // REMOVE/CANCEL APPTS
     const handleRemoveClick = (patient) => setPatientToRemove(patient);
-
 
     // CONFIRM REMOVE/CANCEL
     const confirmRemove = () => {
@@ -150,14 +157,57 @@ export default function DoctorAppointments() {
         setPatientToRemove(null);
     };
 
-    // CHANGE APPTS STATUS
-    const handleStatusChange = (name, newStatus) => { setPatientStatus(prev => ({ ...prev, [name]: newStatus }));};
+    // CHANGE APPTS STATUS  [LOOK HEREE]
+    const handleStatusChange = async (appointmentId, patientId, newStatus) => {
+      // INPUT:
+      console.log("appointmentId = ", appointmentId)
+      console.log("patientId = ", patientId)
+      console.log("newStatus = ", newStatus)
 
+      // ❤️ PARTIAL LOADING IN CARD START [SO YOU CAN MAKE ANOTHER UPDATE WHILE MAKING THE FIRST]
+      setLoadingAppointments(prev => ({ ...prev, [appointmentId]: true }))
+
+      // Store previous status for rollback
+      const prevStatus = patientStatus[patientId];
+
+      // 🇪🇬 UPDATE FRONTEND
+      setPatientStatus(prev => ({ ...prev, [patientId]: newStatus }));
+      setPatients((prev) => ({
+        ...prev,
+        [patientId]: {
+          ...prev[patientId],
+          appointment_reserve_status: newStatus,
+        },
+      }));
+
+      try {
+        // 🇪🇬 UPDATE BACKEND
+        await axios.patch(`http://localhost:8000/appointments/${appointmentId}/`, {
+          reserve_status: newStatus,
+        });
+
+        console.log("Status updated successfully");
+      } catch (error) {
+        console.error("Failed to update status:", error);
+
+        // 🇪🇬 ROLLBACK
+        setPatientStatus(prev => ({ ...prev, [patientId]: prevStatus }));
+        setPatients((prev) => ({
+          ...prev,
+          [patientId]: {
+            ...prev[patientId],
+            appointment_reserve_status: prevStatus,
+          },
+        }));
+      } finally {
+        // ❤️ STOP LOADING
+        setLoadingAppointments(prev => ({ ...prev, [appointmentId]: false }))
+      }
+    };
 
     //::HTML/CSS 🤙:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     return (
     <div className="p-8 max-w-6xl mx-auto relative">
-
         {/* ❤️ LOADING */}
         {loading && <LoadingOverlay/>}
 
@@ -176,7 +226,7 @@ export default function DoctorAppointments() {
         This table displays and manage appointments for the current week, categorized by day and time
         </p>
 
-        {/* TABLE */}        
+        {/* TABLE */}
         <AppointmentTable
         appointments={appointments}
         patients={patients}
@@ -187,6 +237,7 @@ export default function DoctorAppointments() {
         onRemoveClick={handleRemoveClick}
         patientStatus={patientStatus}
         onStatusChange={handleStatusChange}
+        loadingAppointments={loadingAppointments} // [SENU] add loading
         />
 
         {patientToRemove && (
