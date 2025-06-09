@@ -19,7 +19,7 @@ export default function PatientCard({ patient, onRemoveClick, status, onStatusCh
       </button>
 
       <img
-        src={patient.image}
+        src={patient.patient_image_path}
         alt={patient.name}
         className="w-16 h-16 rounded-full object-cover border-2 border-green-300 shadow"
       />
