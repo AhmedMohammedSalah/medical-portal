@@ -15,11 +15,14 @@ export default function RegisterPage() {
     fullName: "",
     email: "",
     role: "",
-    gender: "",
     password: "",
-    confirmPassword: "",
+    confirmPassword: "", 
+    patient_image_path: null,
+    national_id_image_path: null,
+    date_of_birth: "",
   });
   const [idImage, setIdImage] = useState(null);
+  const [patientImage, setPatientImage] = useState(null);
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -38,35 +41,58 @@ export default function RegisterPage() {
     });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (formData.role === "doctor") {
+      setIdImage(file);
+    } else if (formData.role === "patient") {
+      setPatientImage(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { valid, errors } = validateRegisterForm(formData);
     setErrors(errors);
     
-      console.log("Form is valid, proceeding with registration...");
-      try {
-        // Prepare form data for submission
-        const userData = new FormData();
-        userData.append("name", formData.fullName);
-        userData.append("email", formData.email);
-        userData.append("password", formData.password);
-        userData.append("role", formData.role);
+    // if (!valid) {
+    //   console.log("Validation errors:", errors);
+    //   return;
+    // }
 
-        if (formData.role === "doctor" && idImage) {
-          userData.append("id_image", idImage);
-        }
+    try {
+      const userData = new FormData();
+      userData.append("name", formData.fullName);
+      userData.append("email", formData.email);
+      userData.append("password", formData.password);
+      userData.append("role", formData.role);
 
-        // Dispatch register action
-        const result = await dispatch(registerUser(userData));
-        console.log("Registration result:", result);
-        if ( registerUser.fulfilled.match( result ) ) {
-          
-          navigate("/login"); // Redirect to email verification notice
-        }
-      } catch (err) {
-        console.error("Registration error:", err);
+      if (formData.role === "doctor" && idImage) {
+        userData.append("doctor_id_image_path", idImage);
       }
-    
+      
+      if (formData.role === "patient") {
+        if (!patientImage || !formData.date_of_birth) {
+          setErrors({
+            ...errors, 
+            patientImage: !patientImage ? "Patient image is required" : undefined,
+            date_of_birth: !formData.date_of_birth ? "Date of birth is required" : undefined
+          });
+          return;
+        }
+        userData.append("patient_image_path", patientImage);
+        userData.append("date_of_birth", formData.date_of_birth);
+      }
+      console.log("User Data:", Object.fromEntries(userData.entries()));
+
+      const result = await dispatch(registerUser(userData));
+      
+      if (registerUser.fulfilled.match(result)) {
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+    }
   };
 
   return (
@@ -80,7 +106,9 @@ export default function RegisterPage() {
 
         {error && (
           <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-            {error}
+            {typeof error === "object"
+              ? error.message || error.error || JSON.stringify(error)
+              : error}
           </div>
         )}
 
@@ -141,9 +169,36 @@ export default function RegisterPage() {
               </label>
               <input
                 type="file"
+                name="idImage"
                 accept="image/*"
-                onChange={(e) => setIdImage(e.target.files[0])}
+                onChange={handleFileChange}
                 className="block w-full text-sm border rounded px-3 py-2"
+                required
+              />
+            </div>
+          )}
+
+          {formData.role === "patient" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Upload your Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                name="patientImage"
+                onChange={handleFileChange}
+                className="block w-full text-sm border rounded px-3 py-2"
+              />
+
+              <InputField
+                label="Date of Birth"
+                name="date_of_birth"
+                type="date"
+                value={formData.date_of_birth}
+                onChange={handleChange}
+                error={errors.date_of_birth}
+                className="mt-2"
               />
             </div>
           )}
@@ -163,6 +218,7 @@ export default function RegisterPage() {
             onClick={handleSubmit}
             className="w-full bg-[#0A9A73] text-white hover:bg-[#08825f]"
             disabled={loading}
+            type="submit"
           />
 
           <div className="flex justify-center gap-4 text-sm underline text-gray-600">
@@ -170,10 +226,11 @@ export default function RegisterPage() {
             <a href="#">PRIVACY POLICY</a>
           </div>
 
-          <Link to="/login" className="text-center text-sm text-gray-700 mt-4 block">
-            
-              ALREADY HAVE AN ACCOUNT?
-            
+          <Link
+            to="/login"
+            className="text-center text-sm text-gray-700 mt-4 block"
+          >
+            ALREADY HAVE AN ACCOUNT?
           </Link>
         </FormWrapper>
       </div>

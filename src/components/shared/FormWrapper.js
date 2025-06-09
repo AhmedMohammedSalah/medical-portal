@@ -8,6 +8,12 @@ import React from "react";
 
 export default function FormWrapper({ children, className }) {
   return (
-    <div className={className}>{children}</div>
+    <div className={className}>
+      <form encType="multipart/form-data" className="form-wrapper">
+      {children}
+
+      </form>
+
+    </div>
   );
 }
