@@ -16,6 +16,15 @@ export default function AppointmentTable({
   
   console.log("from the table: patients", patients)
 
+  // Utility function to parse 24-hour time strings (e.g., "14:30") for sorting
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes; // Convert to minutes for easy comparison
+  };
+
+  // Sort timeSlots in ascending order
+  const sortedTimeSlots = [...timeSlots].sort((a, b) => parseTime(a) - parseTime(b));
+
   return (
     <div className="overflow-x-auto shadow-2xl rounded-2xl border border-green-200 bg-white">
       <table className="min-w-full divide-y divide-green-200 rounded-lg overflow-hidden">
@@ -29,7 +38,7 @@ export default function AppointmentTable({
         </thead>
         <tbody className="divide-y divide-green-100">
           {/*  */}
-          {timeSlots.map(time => (
+          {sortedTimeSlots.map(time => (
             <tr key={time} className="hover:bg-green-50">
               <td className={`${valueCellClass} font-bold text-green-800`}>
                 {time}
