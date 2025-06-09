@@ -14,8 +14,8 @@ import PatientLayout from './components/layout/patient-layout.jsx';
 import DoctorDetails from './pages/appointments/DoctorDetails.jsx';
 import PatientDetails from './pages/appointments/PatientDetails.jsx';
 import DoctorTimeScheduler from './pages/Doctor/DoctorTimeScheduler/DoctorTimeScheduler.jsx'
-import DoctorApprovedAppointments from './pages/Doctor/DoctorApprovedAppointments.jsx'
 import DoctorDashboard from './pages/Doctor/DoctorDashboard.jsx';
+import DoctorAppointments from './pages/Doctor/DoctorAppointments/index.jsx';
 // import IconButton from './components/shared/iconButton';     
 
 
@@ -40,7 +40,7 @@ function App() {
           <Route path='dashboard/' element={<DoctorDashboard/>}/>
 
           {/* [SENU]: doctor view approved appointments */}
-          <Route path='appointments/view' element={<DoctorApprovedAppointments/>}/>
+          <Route path='appointments/view' element={<DoctorAppointments/>}/>
 
           {/*[AMS]: any route here will have auto header and footer and doctor side bar */}
           <Route path="appointments/:id" element={<DoctorDetails />} />
