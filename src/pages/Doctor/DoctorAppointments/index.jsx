@@ -56,6 +56,9 @@ export default function DoctorAppointments() {
     const [appointments, setAppointments] = useState(initialAppointments);
     const [timeSlots, setTimeSlots] = useState([])
 
+    // [SENU] 🛑 HANDLE EMPTY CASE
+    const [noAppointments, setNoAppointments] = useState(false);
+
     // STATES FOR UPDATES
     const [patientToRemove, setPatientToRemove] = useState(null);
     const [cancelReason, setCancelReason] = useState("The doctor is sorry, but due to an unexpected situation, the appointment has to be cancelled.");
@@ -79,9 +82,15 @@ export default function DoctorAppointments() {
             setLoading(true)
 
             // FETCH appointments that only has reserve status pending
-            const res = await axios.get("http://localhost:8000/appointments/?not_reserve_status=available");
+            const res = await axios.get("http://localhost:8000/appointments/?not_reserve_status=available,cancelled");
             const data = res.data;
             console.log("appointments data = ", data)
+
+            // [SENU] 🛑 CHECK EMPTY CASE
+            if (!data || data.length === 0) {
+              setNoAppointments(true);
+              return;
+            }
 
             // CONTAINERS
             const structuredAppointments = {};
@@ -139,25 +148,55 @@ export default function DoctorAppointments() {
     const handleRemoveClick = (patient) => setPatientToRemove(patient);
 
     // CONFIRM REMOVE/CANCEL
-    const confirmRemove = () => {
+    const confirmRemove = async () => {
         if (!patientToRemove) return;
-        const name = patientToRemove.name;
-        const updatedAppointments = { ...appointments };
 
-        // nested loop [??]
+        const { patient_id, appointment_id } = patientToRemove;
+        const updatedAppointments = { ...appointments };
+        const prevAppointments = { ...appointments }; // Store for rollback
+        const prevPatients = { ...patients }; // Store for rollback
+        const prevPatientStatus = { ...patientStatus }; // Store for rollback
+
+        // Remove from frontend
         for (const time in updatedAppointments) {
             for (const day in updatedAppointments[time]) {
-                if (updatedAppointments[time][day] === name) {
+                if (updatedAppointments[time][day] === patient_id) {
                     delete updatedAppointments[time][day];
                 }
             }
         }
 
+        // Update frontend states
         setAppointments(updatedAppointments);
-        setPatientToRemove(null);
+        setPatientStatus(prev => ({ ...prev, [patient_id]: "cancelled" }));
+        setPatients(prev => {
+            const updated = { ...prev };
+            delete updated[patient_id]; // Remove patient from state
+            return updated;
+        });
+
+        try {
+            // Update backend: Set status to cancelled and add cancellation reason
+            await axios.patch(`http://localhost:8000/appointments/${appointment_id}/`, {
+                reserve_status: "cancelled",
+                reason_of_cancellation: cancelReason,
+            });
+
+            console.log("Appointment cancelled successfully");
+        } catch (error) {
+            console.error("Failed to cancel appointment:", error.response?.data || error.message);
+
+            // Rollback frontend changes
+            setAppointments(prevAppointments);
+            setPatientStatus(prevPatientStatus);
+            setPatients(prevPatients);
+        } finally {
+            setPatientToRemove(null);
+            setCancelReason("The doctor is sorry, but due to an unexpected situation, the appointment has to be cancelled."); // Reset reason
+        }
     };
 
-    // CHANGE APPTS STATUS  [LOOK HEREE]
+    // CHANGE APPTS STATUS
     const handleStatusChange = async (appointmentId, patientId, newStatus) => {
       // INPUT:
       console.log("appointmentId = ", appointmentId)
@@ -226,19 +265,23 @@ export default function DoctorAppointments() {
         This table displays and manage appointments for the current week, categorized by day and time
         </p>
 
-        {/* TABLE */}
-        <AppointmentTable
-        appointments={appointments}
-        patients={patients}
-        days={days}
-        timeSlots={timeSlots}
-        headCellClass={headCellClass}
-        valueCellClass={valueCellClass}
-        onRemoveClick={handleRemoveClick}
-        patientStatus={patientStatus}
-        onStatusChange={handleStatusChange}
-        loadingAppointments={loadingAppointments} // [SENU] add loading
-        />
+        {/* [SENU] 🛑 SHOW NO APPOINTMENTS CASE */}
+        {noAppointments ? (
+          <p className="text-lg text-center text-gray-500 italic mt-20">No appointments found at the moment.</p>
+        ) : (
+          <AppointmentTable
+            appointments={appointments}
+            patients={patients}
+            days={days}
+            timeSlots={timeSlots}
+            headCellClass={headCellClass}
+            valueCellClass={valueCellClass}
+            onRemoveClick={handleRemoveClick}
+            patientStatus={patientStatus}
+            onStatusChange={handleStatusChange}
+            loadingAppointments={loadingAppointments} // [SENU] add loading
+          />
+        )}
 
         {patientToRemove && (
         <ConfirmModal

@@ -22,8 +22,13 @@ export default function AppointmentTable({
     return hours * 60 + minutes; // Convert to minutes for easy comparison
   };
 
-  // Sort timeSlots in ascending order
-  const sortedTimeSlots = [...timeSlots].sort((a, b) => parseTime(a) - parseTime(b));
+  // Filter timeSlots to only include those with at least one patient
+  const filteredTimeSlots = timeSlots.filter(time => 
+    days.some(day => appointments[time]?.[day])
+  );
+
+  // Sort filtered timeSlots in ascending order
+  const sortedTimeSlots = [...filteredTimeSlots].sort((a, b) => parseTime(a) - parseTime(b));
 
   return (
     <div className="overflow-x-auto shadow-2xl rounded-2xl border border-green-200 bg-white">
