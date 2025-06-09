@@ -11,7 +11,11 @@ export default function AppointmentTable({
   onRemoveClick,
   patientStatus,
   onStatusChange,
+  loadingAppointments, // [SENU] add loading
 }) {
+  
+  console.log("from the table: patients", patients)
+
   return (
     <div className="overflow-x-auto shadow-2xl rounded-2xl border border-green-200 bg-white">
       <table className="min-w-full divide-y divide-green-200 rounded-lg overflow-hidden">
@@ -24,7 +28,6 @@ export default function AppointmentTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-green-100">
-
           {/*  */}
           {timeSlots.map(time => (
             <tr key={time} className="hover:bg-green-50">
@@ -32,12 +35,13 @@ export default function AppointmentTable({
                 {time}
               </td>
               {days.map(day => {
-
                 // WE WILL PLAY HERE
                 const PID = appointments[time]?.[day];
-
                 const patientName = appointments[time]?.[day];
                 const patient = patients[patientName];
+
+                console.log("from table, patientStatus[patient?.name] =", patient ? patientStatus[patient.patient_id] : undefined);
+                console.log("from table, patient.appointment_reserve_status =", patient ? patient.appointment_reserve_status : undefined);
 
                 return (
                   <td key={day} className={valueCellClass}>
@@ -45,8 +49,10 @@ export default function AppointmentTable({
                       <PatientCard
                         patient={patient}
                         onRemoveClick={onRemoveClick}
-                        status={patientStatus[patient.name]}
+                        status={patientStatus[patient.patient_id]}
                         onStatusChange={onStatusChange}
+                        cardLoading={loadingAppointments[patient.appointment_id] || false} // [SENU] add loading
+                        currentStatus={patientStatus[patient.patient_id]}
                       />
                     ) : (
                       "-"
