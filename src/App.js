@@ -40,7 +40,7 @@ function App() {
         <Route path="/doctor" element={<DoctorLayout />}>
 
           {/* [SENU]: doctor dashboard */}
-          <Route path='dashboard/' element={<DoctorDashboard/>}/>
+          <Route index element={<DoctorDashboard/>}/>
 
           {/* [SENU]: doctor view approved appointments */}
           <Route path='appointments/view' element={<DoctorAppointments/>}/>
@@ -50,6 +50,10 @@ function App() {
 
           {/* [SENU]: doctor time scheduler page route */}
           <Route path='scheduler/' element={<DoctorTimeScheduler/>}/>
+
+
+          {/*[OKS]:doctor profile  */}
+          {/* <Route path="DoctorProfile/" element={<DoctorProfile />}></Route> */}
 
         </Route>
 

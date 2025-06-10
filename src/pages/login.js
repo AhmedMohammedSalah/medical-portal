@@ -42,7 +42,7 @@ export default function LoginPage() {
         if (loginUser.fulfilled.match(result)) {
           // Redirect based on user role
           if (result.payload.role == "doctor") {
-            navigate("/doctor-dashboard");
+            navigate("/doctor");
           } else {
             navigate("/");
           }
