@@ -67,7 +67,7 @@ function App() {
 
 
 
-          {/*[]: Doctor layout */}
+          {/*[OKS]:doctor profile  */}
         <Route path="/doctor/DoctorProfile" element={<DoctorProfile />}></Route>
 
         {/* [AMS]=> 🙂- amira 404  must be at the end of routes */}

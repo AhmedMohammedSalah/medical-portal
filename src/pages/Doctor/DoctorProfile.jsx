@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/shared/sidebar';
 import { UserIcon } from '@heroicons/react/24/solid';
 import apiEndpoints from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import LoadingOverlay from '../../components/shared/LoadingOverlay';
 
+// [OKS] view and edit doctor profile page
 export default function DoctorProfile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
@@ -22,15 +23,13 @@ export default function DoctorProfile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch doctor profile
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        // First get user info
+        //[OKS] First get user info
         const userResponse = await apiEndpoints.users.getCurrentUser();
-
-        // Then get doctor profile
+        // [OKS] Then get doctor profile
         const doctorResponse = await apiEndpoints.profile.getDoctorProfile();
         const data = doctorResponse.data;
 
@@ -108,38 +107,35 @@ export default function DoctorProfile() {
     }
   };
 
-  if (loading && !editMode) return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 p-6 sm:p-10 flex items-center justify-center">
-        <div className="text-lg">Loading profile...</div>
+  if (loading && !editMode) {
+    return (
+      <div className="flex min-h-screen bg-gray-100">
+        <LoadingOverlay />
       </div>
-    </div>
-  );
+    );
+  }
 
   if (error) return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
       <div className="flex-1 p-6 sm:p-10 flex items-center justify-center">
         <div className="text-red-500 text-lg">Error: {error}</div>
       </div>
     </div>
   );
 
-  // Days of week for selection
+  //[OKS] Days of week for selection
   const weekDays = [
-    { label: 'Sat', value: 'sat' },
-    { label: 'Sun', value: 'sun' },
-    { label: 'Mon', value: 'mon' },
-    { label: 'Tue', value: 'tue' },
-    { label: 'Wed', value: 'wed' },
-    { label: 'Thu', value: 'thu' },
-    { label: 'Fri', value: 'fri' },
+    { label: 'Saturday', value: 'sat' },
+    { label: 'Sunday', value: 'sun' },
+    { label: 'Monday', value: 'mon' },
+    { label: 'Tuesday', value: 'tue' },
+    { label: 'Wednesday', value: 'wed' },
+    { label: 'Thursday', value: 'thu' },
+    { label: 'Friday', value: 'fri' },
   ];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
       <div className="flex-1 p-6 sm:p-10">
         <div className="w-full bg-white rounded-2xl shadow-lg p-8">
           <div className="flex items-center gap-4 mb-6">
@@ -160,7 +156,6 @@ export default function DoctorProfile() {
             </div>
           </div>
 
-          {/* Images section */}
           <div className="flex gap-4 mb-6">
             {profile.national_id_image_path && (
               <img
@@ -237,24 +232,25 @@ export default function DoctorProfile() {
                 />
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Available Days</label>
-                <div className="flex flex-wrap gap-2">
-                  {weekDays.map(day => (
-                    <label key={day.value} className="flex items-center gap-1">
-                      <input
-                        type="checkbox"
-                        value={day.value}
-                        checked={Array.isArray(profile.available_days) && profile.available_days.includes(day.value)}
-                        onChange={handleDaysChange}
-                      />
-                      {day.label}
-                    </label>
-                  ))}
+              {profile.doctor_availability && (
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Available Days</label>
+                  <div className="flex flex-wrap gap-2">
+                    {weekDays.map(day => (
+                      <label key={day.value} className="flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          value={day.value}
+                          checked={Array.isArray(profile.available_days) && profile.available_days.includes(day.value)}
+                          onChange={handleDaysChange}
+                        />
+                        {day.label}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Specializations field can be added here as select/multiselect if you wish */}
 
               <div className="col-span-1 sm:col-span-2 flex justify-end gap-3 mt-4">
                 <button
@@ -296,14 +292,16 @@ export default function DoctorProfile() {
                 <p className="text-sm text-gray-500">Available</p>
                 <p className="font-medium">{profile.doctor_availability ? 'Yes' : 'No'}</p>
               </div>
-              <div className="sm:col-span-2">
-                <p className="text-sm text-gray-500">Available Days</p>
-                <p className="font-medium">
-                  {Array.isArray(profile.available_days) && profile.available_days.length
-                    ? profile.available_days.map(d => weekDays.find(wd => wd.value === d)?.label).join(', ')
-                    : 'None'}
-                </p>
-              </div>
+              {profile.doctor_availability && (
+                <div className="sm:col-span-2">
+                  <p className="text-sm text-gray-500">Available Days</p>
+                  <p className="font-medium">
+                    {Array.isArray(profile.available_days) && profile.available_days.length
+                      ? profile.available_days.map(d => weekDays.find(wd => wd.value === d)?.label).join(', ')
+                      : 'None'}
+                  </p>
+                </div>
+              )}
               <div className="col-span-1 sm:col-span-2 mt-6">
                 <button
                   onClick={() => setEditMode(true)}

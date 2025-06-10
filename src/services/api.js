@@ -103,7 +103,7 @@ const apiEndpoints = {
     getPatientProfile: () => api.get("patients/me/"),
     updatePatientProfile: (data) => api.put("patients/me/", data),
     getDoctorProfile: () => api.get("doctors/doctors/me"),
-    updateDoctorProfile: (data) => api.put("doctors/doctors/me", data),
+    updateDoctorProfile: (data) => api.put("doctors/doctors/me/", data),
   },
   users: {
     register: (userData) => apiFileUpload.post("users/", userData),

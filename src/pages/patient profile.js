@@ -3,7 +3,9 @@
   import { UserIcon } from '@heroicons/react/24/solid';
   import apiEndpoints from '../services/api';
   import { useNavigate } from 'react-router-dom';
-
+  import LoadingOverlay from '../components/shared/LoadingOverlay'; 
+  
+// [OKS] view and edit patient profile page
   export default function PatientProfile() {
     const navigate = useNavigate();
     const [profile, setProfile] = useState({
@@ -16,15 +18,12 @@
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Fetch patient profile
     useEffect(() => {
       const fetchProfile = async () => {
         setLoading(true);
         try {
-          // First get user info
           const userResponse = await apiEndpoints.users.getCurrentUser();
           
-          // Then get patient profile
           const patientResponse = await apiEndpoints.profile.getPatientProfile();
           
           setProfile({
@@ -73,18 +72,15 @@
       }
     };
 
-    if (loading && !editMode) return (
-      <div className="flex min-h-screen bg-gray-100">
-        <Sidebar />
-        <div className="flex-1 p-6 sm:p-10 flex items-center justify-center">
-          <div className="text-lg">Loading profile...</div>
-        </div>
-      </div>
-    );
-
+     if (loading && !editMode) {
+        return (
+          <div className="flex min-h-screen bg-gray-100">
+            <LoadingOverlay />
+          </div>
+        );
+      }
     if (error) return (
       <div className="flex min-h-screen bg-gray-100">
-        <Sidebar />
         <div className="flex-1 p-6 sm:p-10 flex items-center justify-center">
           <div className="text-red-500 text-lg">Error: {error}</div>
         </div>
@@ -93,7 +89,6 @@
 
     return (
       <div className="flex min-h-screen bg-gray-100">
-        <Sidebar />
 
         <div className="flex-1 p-6 sm:p-10">
           <div className="w-full bg-white rounded-2xl shadow-lg p-8">
