@@ -17,7 +17,8 @@ import DoctorTimeScheduler from './pages/Doctor/DoctorTimeScheduler/DoctorTimeSc
 import DoctorDashboard from './pages/Doctor/DoctorDashboard.jsx';
 import DoctorAppointments from './pages/Doctor/DoctorAppointments/index.jsx';
 // import IconButton from './components/shared/iconButton';     
-
+import LoginPage from './pages/login.js';
+import RegisterPage from './pages/register.js';
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
 
           {/*[AMS] any route here will have auto header and footer */}
           <Route path="" element={<Home />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
 
         </Route>
 
@@ -53,11 +56,11 @@ function App() {
         {/* [AMS] Patient layout */}
         <Route path="/patient" element={<PatientLayout />}>
           {/*[AMS] any route here will have auto header and footer and patient side bar */}
-          <Route path="appointments/:id" element={<PatientDetails />} />
-        <Route path="patientlist" element={<PatientlistDoctor />}/>
-        <Route path="book" element={<BookAppointmentModal />}/>
-        <Route path="patientprofile" element={<PatientProfile />}/>
-        <Route path="appointment" element={<MyAppointments />}/>
+            <Route path="appointments/:id" element={<PatientDetails />} />
+            <Route path="patientlist" element={<PatientlistDoctor />}/>
+            <Route path="book" element={<BookAppointmentModal />}/>
+            <Route path="patientprofile" element={<PatientProfile />}/>
+            <Route path="appointment" element={<MyAppointments />}/>
         </Route>
 
 

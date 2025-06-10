@@ -17,7 +17,7 @@ export default function DropdownList({
     options,
     value,
     onChange,
-    error,
+    error,name,
     className = "",
 }) {
     return (
@@ -29,7 +29,8 @@ export default function DropdownList({
         {/* DROP DOWN LIST */}
         <select className={`w-full p-2 border rounded ${error ? "border-red-500" : "border-gray-300"}`}
         value={value}
-        onChange={onChange}
+                onChange={onChange}
+                name={name}
         >
 
         {/* PLACEHOLDER OPTION */}
