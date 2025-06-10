@@ -13,11 +13,14 @@
       email: '',
       phone: '',
       date_of_birth: '',
+      patient_image_path: '' // [SENU] ADD IMAGE
     });
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+
+    // ON MOUNT
     useEffect(() => {
       const fetchProfile = async () => {
         setLoading(true);
@@ -25,12 +28,16 @@
           const userResponse = await apiEndpoints.users.getCurrentUser();
           
           const patientResponse = await apiEndpoints.profile.getPatientProfile();
+          console.log("Fetched patient data:", patientResponse.data);  // <-- SENU GIVE A LOOK
           
+          // patient_image_path
+          console.log("useEffect: the data = ", patientResponse.data.patient_image_path )
           setProfile({
             name: `${userResponse.data.name}`,
             email: userResponse.data.email,
             phone: patientResponse.data.phone,
             date_of_birth: patientResponse.data.date_of_birth,
+            patient_image_path: patientResponse.data.patient_image_path || '' //[SENU]: ADD IMAGE
           });
         } catch (err) {
           setError(err.response?.data?.detail || 'Failed to fetch profile');
@@ -44,6 +51,8 @@
 
       fetchProfile();
     }, [navigate]);
+
+    // END OF MOUNT
 
     const handleChange = (e) => {
       setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -93,9 +102,20 @@
         <div className="flex-1 p-6 sm:p-10">
           <div className="w-full bg-white rounded-2xl shadow-lg p-8">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-700">
-                <UserIcon className="w-10 h-10" />
-              </div>
+
+              {/* [SENU] ADD CONDITION: ICON || IMAGE */}
+              {profile.patient_image_path ? (
+                <img
+                  src={profile.patient_image_path}
+                  alt="Patient"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-green-500"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-700">
+                  <UserIcon className="w-10 h-10" />
+                </div>
+              )}
+              {/* CHANGE END */}
               <div>
                 <h2 className="text-3xl font-bold text-gray-800">Patient Profile</h2>
                 <p className="text-sm text-gray-500">Manage your personal details</p>
