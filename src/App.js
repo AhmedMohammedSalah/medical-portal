@@ -10,6 +10,7 @@ import PatientProfile from './pages/patient profile';
 import NotFound from './pages/Notfound';
 import MyAppointments from './pages/myappointment';
 import DoctorLayout from './components/layout/doctor-layout.jsx';
+import DoctorProfile from './pages/Doctor/DoctorProfile.jsx'
 import PatientLayout from './components/layout/patient-layout.jsx';
 import DoctorDetails from './pages/appointments/DoctorDetails.jsx';
 import PatientDetails from './pages/appointments/PatientDetails.jsx';
@@ -53,7 +54,7 @@ function App() {
 
 
           {/*[OKS]:doctor profile  */}
-          {/* <Route path="DoctorProfile/" element={<DoctorProfile />}></Route> */}
+          <Route path="DoctorProfile/" element={<DoctorProfile />}></Route>
 
         </Route>
 
@@ -66,7 +67,6 @@ function App() {
             <Route path="patientprofile" element={<PatientProfile />}/>
             <Route path="appointment" element={<MyAppointments />}/>
         </Route>
-
 
         {/* [AMS]=> 🙂- amira 404  must be at the end of routes */}
         <Route path="*" element={<NotFound />}/>

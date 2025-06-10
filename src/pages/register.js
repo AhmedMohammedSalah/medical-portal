@@ -10,6 +10,7 @@ import { validateRegisterForm } from "../utils/validation";
 import { Link } from "react-router-dom";
 import Spinner from "../components/shared/Spinner";
 
+
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     fullName: "",

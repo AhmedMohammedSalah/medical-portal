@@ -99,12 +99,19 @@ const apiEndpoints = {
     googleAuth: (tokenData) => api.post("users/google-auth/", tokenData),
     googleLogin: () => api.get("users/auth/google/"), // For server-side flow
   },
+   profile: {
+    getPatientProfile: () => api.get("patients/me/"),
+    updatePatientProfile: (data) => api.put("patients/me/", data),
+    getDoctorProfile: () => api.get("doctors/doctors/me"),
+    updateDoctorProfile: (data) => api.put("doctors/doctors/me/", data),
+  },
   users: {
     register: (userData) => apiFileUpload.post("users/", userData),
     getCurrentUser: () => api.get("users/me/"),
     updateUser: (userData) => api.patch("users/me/", userData),
     deleteUser: () => api.delete("users/me/"),
   },
+  
   // Add other endpoints as needed
 };
 

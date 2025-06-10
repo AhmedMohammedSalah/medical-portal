@@ -33,7 +33,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
           { id: "dashboard", label: "Dashboard", icon: Home, href: "/doctor/dashboard" },
           { id: "calendar", label: "Manage Time", icon: Calendar, href: "/doctor/scheduler" },
           { id: "appointments", label: "Appointments", icon: ClipboardList, href: "/doctor/appointments/view" },
-          { id: "profile", label: "My Profile", icon: User, href: "/doctor/profile" },
+          { id: "profile", label: "My Profile", icon: User, href: "/doctor/DoctorProfile" },
           { id: "settings", label: "Settings", icon: Settings, href: "/doctor/settings" },
         ]
       case "patient":
@@ -42,7 +42,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
           { id: "dashboard", label: "Dashboard", icon: Home, href: "/patient/dashboard" },
           { id: "doctors", label: "Find Doctors", icon: UserCheck, href: "/patient/doctors" },
           { id: "appointments", label: "My Appointments", icon: Calendar, href: "/patient/appointments" },
-          { id: "profile", label: "My Profile", icon: User, href: "/patient/profile" },
+          { id: "profile", label: "My Profile", icon: User, href: "/patient/patientprofile" },
           { id: "settings", label: "Settings", icon: Settings, href: "/patient/settings" },
         ]
     }
