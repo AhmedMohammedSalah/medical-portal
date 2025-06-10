@@ -16,12 +16,14 @@ export default function RegisterPage() {
     email: "",
     role: "",
     password: "",
-    confirmPassword: "", 
+    confirmPassword: "",
     patient_image_path: null,
     national_id_image_path: null,
+    doctor_image_path: null, // [SENU] Added for doctor profile image
     date_of_birth: "",
   });
   const [idImage, setIdImage] = useState(null);
+  const [doctorImage, setDoctorImage] = useState(null); // [SENU] Added for doctor profile image
   const [patientImage, setPatientImage] = useState(null);
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
@@ -43,9 +45,12 @@ export default function RegisterPage() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (formData.role === "doctor") {
+    const { name } = e.target;
+    if (name === "national_id_image_path") {
       setIdImage(file);
-    } else if (formData.role === "patient") {
+    } else if (name === "doctor_image_path") {
+      setDoctorImage(file);
+    } else if (name === "patient_image_path") {
       setPatientImage(file);
     }
   };
@@ -67,15 +72,22 @@ export default function RegisterPage() {
       userData.append("password", formData.password);
       userData.append("role", formData.role);
 
-      if (formData.role === "doctor" && idImage) {
-        userData.append("doctor_id_image_path", idImage);
+      if (formData.role === "doctor") {
+        if (!idImage) {
+          setErrors({ ...errors, national_id_image_path: "National ID image is required" });
+          return;
+        }
+        userData.append("national_id_image_path", idImage);
+        if (doctorImage) {
+          userData.append("doctor_image_path", doctorImage); // [SENU] Optional doctor profile image
+        }
       }
       
       if (formData.role === "patient") {
         if (!patientImage || !formData.date_of_birth) {
           setErrors({
             ...errors, 
-            patientImage: !patientImage ? "Patient image is required" : undefined,
+            patient_image_path: !patientImage ? "Patient image is required" : undefined,
             date_of_birth: !formData.date_of_birth ? "Date of birth is required" : undefined
           });
           return;
@@ -163,19 +175,36 @@ export default function RegisterPage() {
           />
 
           {formData.role === "doctor" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload ID Image
-              </label>
-              <input
-                type="file"
-                name="idImage"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="block w-full text-sm border rounded px-3 py-2"
-                required
-              />
-            </div>
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Upload National ID Image
+                </label>
+                <input
+                  type="file"
+                  name="national_id_image_path"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm border rounded px-3 py-2"
+                  required
+                />
+                {errors.national_id_image_path && (
+                  <p className="text-red-500 text-sm">{errors.national_id_image_path}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Upload Profile Image (Optional)
+                </label>
+                <input
+                  type="file"
+                  name="doctor_image_path"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm border rounded px-3 py-2"
+                />
+              </div>
+            </>
           )}
 
           {formData.role === "patient" && (
@@ -186,10 +215,13 @@ export default function RegisterPage() {
               <input
                 type="file"
                 accept="image/*"
-                name="patientImage"
+                name="patient_image_path"
                 onChange={handleFileChange}
                 className="block w-full text-sm border rounded px-3 py-2"
               />
+              {errors.patient_image_path && (
+                <p className="text-red-500 text-sm">{errors.patient_image_path}</p>
+              )}
 
               <InputField
                 label="Date of Birth"
