@@ -109,7 +109,8 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refresh;
         state.emailVerified = action.payload.email_verified || false;
         localStorage.setItem('access_token', action.payload.access);
-        localStorage.setItem('refresh_token', action.payload.refresh);
+        localStorage.setItem( 'refresh_token', action.payload.refresh );
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

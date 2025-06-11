@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../features/authSlice";
+import { loginUser, setCredentials } from "../features/authSlice";
 import FormWrapper from "./../components/shared/FormWrapper";
 import InputField from "./../components/shared/InputField";
 import BigBtn from "./../components/shared/BigBtn";
@@ -39,12 +39,25 @@ export default function LoginPage() {
       try {
         const result = await dispatch(loginUser(formData));
 
-        if (loginUser.fulfilled.match(result)) {
+        if ( loginUser.fulfilled.match( result ) ) {
+          dispatch(
+            setCredentials({
+              user: result.payload.user,
+              accessToken: result.payload.access,
+              refreshToken: result.payload.refresh,
+            })
+          );
+  
           // Redirect based on user role
-          if (result.payload.role == "doctor") {
+          console.log(result.payload);
+          if (result.payload.user.role == "doctor") {
             navigate("/doctor");
-          } else {
-            navigate("/doctor");
+          } else if (result.payload.user.role == "patient") {
+            navigate("/patient");
+          }
+          else if (result.payload.user.role == "admin") {
+            // redirect to http://localhost:8000/admin
+            window.location.href = "http://localhost:8000/admin";
           }
         } 
       } catch (err) {
