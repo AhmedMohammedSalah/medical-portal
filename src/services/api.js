@@ -120,6 +120,17 @@ const apiEndpoints = {
     create: (notificationData) => api.post("notifications/", notificationData),
   },
   // Add other endpoints as needed
+  doctors: {
+    doctorsResponse: () => api.get("doctors/doctors/"),
+  },
+  appointments: {
+    getDoctorAvailableAppointments: (doctorId) =>
+      api.get(`appointments`, { params: { doctor_id: doctorId, reserve_status: 'available' }}),
+    
+    // Add the bookAppointment method
+    bookAppointment: (appointmentId, data) =>
+      api.patch(`appointments/${appointmentId}/`, data),
+  },
 };
 
 export default apiEndpoints;
