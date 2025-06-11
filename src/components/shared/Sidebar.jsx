@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   Home,
   Calendar,
@@ -13,10 +13,17 @@ import {
   ClipboardList,
   User,
 } from "lucide-react"
-
+import { useDispatch } from "react-redux"
 const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
   const location = useLocation()
-
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const handleLogout = () => {
+    // Dispatch logout action
+    dispatch({ type: "auth/logout" })
+    // Optionally, redirect to login page
+    navigate("/")
+  }
   const getMenuItems = () => {
     switch (userRole) {
       case "admin":
@@ -40,7 +47,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
       default:
         return [
           { id: "dashboard", label: "Dashboard", icon: Home, href: "/patient/dashboard" },
-          { id: "doctors", label: "Find Doctors", icon: UserCheck, href: "/patient/doctors" },
+          { id: "doctors", label: "Find Doctors", icon: UserCheck, href: "/patient/patientlist" },
           { id: "appointments", label: "My Appointments", icon: Calendar, href: "/patient/appointments" },
           { id: "profile", label: "My Profile", icon: User, href: "/patient/patientprofile" },
           { id: "settings", label: "Settings", icon: Settings, href: "/patient/settings" },
@@ -134,7 +141,9 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
         </div>
 
         {!isCollapsed && (
-          <button className="w-full mt-3 flex items-center space-x-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button className="w-full mt-3 flex items-center space-x-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={handleLogout}
+          >
             <LogOut className="w-4 h-4" />
             <span className="text-sm">Logout</span>
           </button>
