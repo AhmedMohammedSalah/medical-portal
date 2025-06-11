@@ -186,23 +186,7 @@ import {
               </div>
             </section>
   
-            {/* Notifications */}
-            <aside className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <Bell className="text-emerald-600 mr-2" size={20} />
-                  Notifications
-                </h2>
-                <button className="text-emerald-600 text-sm font-medium">
-                  Mark All as Read
-                </button>
-              </div>
-              <div className="space-y-4">
-                {notifications.map((n) => (
-                  <NotificationItem key={n.id} notification={n} />
-                ))}
-              </div>
-            </aside>
+            
           </div>
   
           {/* Recent Patients Placeholder */}

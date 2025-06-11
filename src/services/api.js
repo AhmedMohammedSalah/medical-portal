@@ -99,7 +99,7 @@ const apiEndpoints = {
     googleAuth: (tokenData) => api.post("users/google-auth/", tokenData),
     googleLogin: () => api.get("users/auth/google/"), // For server-side flow
   },
-   profile: {
+  profile: {
     getPatientProfile: () => api.get("patients/me/"),
     updatePatientProfile: (data) => api.put("patients/me/", data),
     getDoctorProfile: () => api.get("doctors/doctors/me"),
@@ -111,7 +111,14 @@ const apiEndpoints = {
     updateUser: (userData) => api.patch("users/me/", userData),
     deleteUser: () => api.delete("users/me/"),
   },
-  
+  // [AMS]
+  notifications: {
+    list: () => api.get("notifications/"),
+    detail: (id) => api.get(`notifications/${id}/`),
+    markRead: (id) => api.patch(`notifications/${id}/`, { is_read: true }),
+    delete: (id) => api.delete(`notifications/${id}/`),
+    create: (notificationData) => api.post("notifications/", notificationData),
+  },
   // Add other endpoints as needed
 };
 
