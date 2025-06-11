@@ -76,8 +76,8 @@ function App() {
         {/* [AMS] Patient layout */}
 
         {/* Patient routes - only for authenticated patients */}
-        <Route element={<RequireAuth />}>
-          <Route element={<RequireRole allowedRoles={["patient"]} />}>
+        {/* <Route element={<RequireAuth />}> */}
+          {/* <Route element={<RequireRole allowedRoles={["patient"]} />}> */}
             <Route path="/patient" element={<PatientLayout />}>
               <Route path="appointments/:id" element={<PatientDetails />} />
               <Route path="patientlist" element={<PatientlistDoctor />} />
@@ -85,8 +85,8 @@ function App() {
               <Route path="patientprofile" element={<PatientProfile />} />
               <Route path="appointment" element={<MyAppointments />} />
             </Route>
-          </Route>
-        </Route>
+          {/* </Route> */}
+        {/* </Route> */}
 
         {/* [AMS]=> 🙂 unauthorized page */}
         <Route path="/unauthorized" element={<Unauthorized />} />
