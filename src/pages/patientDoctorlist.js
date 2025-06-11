@@ -1,45 +1,9 @@
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/shared/sidebar';
+import apiEndpoints from '../services/api';
+import LoadingOverlay from '../components/shared/LoadingOverlay';
+// import Sidebar from '../components/shared/sidebar';
 
-const doctorsData = [
-    {
-        id: 1,
-        name: 'Dr. Alice Johnson',
-        specialty: 'Cardiologist',
-        availability: {
-            Monday: ['10:00 AM', '11:00 AM'],
-            Wednesday: ['2:00 PM'],
-            Friday: ['9:00 AM'],
-        },
-    },
-    {
-        id: 2,
-        name: 'Dr. Bob Smith',
-        specialty: 'Dermatologist',
-        availability: {
-            Tuesday: ['11:00 AM'],
-            Thursday: ['3:00 PM', '4:00 PM'],
-        },
-    },
-    {
-        id: 3,
-        name: 'Dr. Carol Lee',
-        specialty: 'Pediatrician',
-        availability: {
-            Monday: ['1:00 PM'],
-            Wednesday: ['9:00 AM'],
-        },
-    },
-    {
-        id: 4,
-        name: 'Dr. David White',
-        specialty: 'Cardiologist',
-        availability: {
-            Friday: ['2:00 PM'],
-            Saturday: ['10:00 AM'],
-        },
-    },
-];
 
 function BookingModal({ doctor, onClose }) {
     const [selectedDay, setSelectedDay] = useState('');
@@ -47,17 +11,66 @@ function BookingModal({ doctor, onClose }) {
     const [note, setNote] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [times, setTimes] = useState([]); // State to store available time slots for the selected day
 
-    const handleSubmit = (e) => {
+    // Extract available appointments from the doctor object
+    const availableAppointments = doctor.availableAppointments || [];
+    const days = [...new Set(availableAppointments.map((appt) => appt.day))];
+
+    // Handle day selection and update time slots
+    const handleDayChange = (day) => {
+        setSelectedDay(day);
+        setSelectedTime(''); // Reset selected time when day changes
+
+        // Filter available appointments for the selected day and extract time slots with IDs
+        const filteredTimes = availableAppointments
+            .filter((appt) => appt.day === day)
+            .map((appt) => ({ id: appt.id, time: `${appt.from_time} - ${appt.to_time}` })); // Include appointment ID
+        setTimes(filteredTimes);
+
+        console.log('Filtered times for selected day:', filteredTimes); // Debugging
+    };
+
+
+    // HANDE CONFIRMING BOOKING THE APPOINTMNET
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (selectedDay && selectedTime) {
-            setErrorMessage('');
-            setSuccessMessage(`Successfully booked ${doctor.name} on ${selectedDay} at ${selectedTime}${note ? ` with note: "${note}"` : ''}`);
-            setTimeout(() => {
-                setSuccessMessage('');
-                onClose();
-            }, 3000);
+            try {
+                // Extract the appointment ID from the selected time
+                const appointmentId = selectedTime;
+                console.log('Selected appointment ID:', appointmentId);
+
+                // Get the current user's patient ID
+                const currentUserResponse = await apiEndpoints.profile.getPatientProfile();
+                const patientId = currentUserResponse.data.patient_id;
+
+                // Update the appointment
+                await apiEndpoints.appointments.bookAppointment(appointmentId, {
+                    reserve_status: 'pending',
+                    patient_id: patientId,
+                });
+
+                // Find the selected time object
+                const selectedTimeObject = times.find((time) => time.id === appointmentId);
+
+                // Show success message
+                setErrorMessage('');
+                setSuccessMessage(
+                    `Successfully booked ${doctor.doctor_name} on ${selectedDay} at ${
+                        selectedTimeObject ? selectedTimeObject.time : 'Unknown Time'
+                    }${note ? ` with note: "${note}"` : ''}`
+                );
+
+                setTimeout(() => {
+                    setSuccessMessage('');
+                    onClose();
+                }, 3000);
+            } catch (error) {
+                console.error('Error updating appointment:', error);
+                setErrorMessage('Failed to book the appointment. Please try again.');
+            }
         } else {
             setSuccessMessage('');
             setErrorMessage('Please select both day and time.');
@@ -65,14 +78,13 @@ function BookingModal({ doctor, onClose }) {
         }
     };
 
-    const days = Object.keys(doctor.availability);
-    const times = selectedDay ? doctor.availability[selectedDay] : [];
-
     return (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
                 <h2 className="text-xl font-bold mb-4 text-green-700">Book Appointment</h2>
-                <p className="mb-2"><strong>Doctor:</strong> {doctor.name}</p>
+                <p className="mb-2">
+                    <strong>Doctor:</strong> {doctor.doctor_name}
+                </p>
 
                 {successMessage && (
                     <div className="mb-4 px-4 py-2 bg-green-100 text-green-800 rounded-md text-sm border border-green-300">
@@ -91,10 +103,7 @@ function BookingModal({ doctor, onClose }) {
                         <label className="block text-sm font-medium mb-1">Select Day</label>
                         <select
                             value={selectedDay}
-                            onChange={(e) => {
-                                setSelectedDay(e.target.value);
-                                setSelectedTime('');
-                            }}
+                            onChange={(e) => handleDayChange(e.target.value)}
                             className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         >
                             <option value="">-- Choose a day --</option>
@@ -115,18 +124,17 @@ function BookingModal({ doctor, onClose }) {
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2"
                             >
                                 <option value="">-- Choose a time --</option>
-                                {times.map((time, index) => (
-                                    <option key={index} value={time}>
-                                        {time}
+                                {times.map((time) => (
+                                    <option key={time.id} value={time.id}>
+                                        {time.time}
                                     </option>
                                 ))}
                             </select>
                         </div>
                     )}
 
-                    {/* New Note Field */}
                     <div className="mb-4">
-                        <label className="block text-sm font-medium mb-1">Reason for visit(optional)</label>
+                        <label className="block text-sm font-medium mb-1">Reason for visit (optional)</label>
                         <textarea
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
@@ -156,20 +164,50 @@ function BookingModal({ doctor, onClose }) {
 }
 
 export default function DoctorListWithAvailability() {
+
+    const [loading, setLoading] = useState(false); // SENU: start loading
     const [doctors, setDoctors] = useState([]);
     const [filteredDoctors, setFilteredDoctors] = useState([]);
     const [filters, setFilters] = useState({ name: '', specialty: '' });
     const [selectedBooking, setSelectedBooking] = useState(null);
 
-    useEffect(() => {
-        setDoctors(doctorsData);
-        setFilteredDoctors(doctorsData);
-    }, []);
 
+    // ON MOUNT
+    useEffect(() => {
+        const fetchAvailableDoctors = async () => {
+            try {
+                setLoading(true); // Start loading
+
+
+                //FETCH CURRENT USER [PATIENT]
+                const currentUserResponse = await apiEndpoints.profile.getPatientProfile();
+                const patient_id = currentUserResponse.data.patient_id;
+                console.log('patient_id:', patient_id);
+                
+                // FETCHING AVAILBLE DOCTORS
+                const doctorsResponse = await apiEndpoints.doctors.doctorsResponse();
+                const doctors = doctorsResponse.data;
+                console.log('Fetched doctors:', doctors);
+
+                // Filter doctors with has_available_appointment = true
+                const availableDoctors = doctors.filter((doc) => doc.has_available_appointment);
+                setDoctors(availableDoctors);
+            } catch (error) {
+                console.error('Error fetching doctors:', error);
+            } finally {
+                setLoading(false); // Stop loading
+            }
+        };
+
+        fetchAvailableDoctors(); // Call it
+    }, []);
+    
+
+    // ON UPDATE
     useEffect(() => {
         const filtered = doctors.filter(
             (doc) =>
-                doc.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+                doc.doctor_name.toLowerCase().includes(filters.name.toLowerCase()) && // Use doctor_name
                 (filters.specialty === '' || doc.specialty === filters.specialty)
         );
         setFilteredDoctors(filtered);
@@ -177,18 +215,43 @@ export default function DoctorListWithAvailability() {
 
     const specialties = [...new Set(doctors.map((doc) => doc.specialty))];
 
-    const handleBook = (doctor) => {
-        setSelectedBooking(doctor);
+    const handleBook = async (doctor) => {
+        if (!doctor) {
+            console.error('Doctor object is undefined:', doctor);
+            return;
+        }
+
+        try {
+            // Fetch appointments for the selected doctor with reserve_status='available'
+            const response = await apiEndpoints.appointments.getDoctorAvailableAppointments(doctor.doctor_id);
+            console.log('Available appointments:', response.data);
+            if (!response.data || response.data.length === 0) {
+                console.error('No available appointments found for this doctor.');
+                return;
+            }
+
+            const availableAppointments = response.data;
+
+            // Add available appointments to the doctor object
+            setSelectedBooking({ ...doctor, availableAppointments });
+        } catch (error) {
+            console.error('Error fetching available appointments:', error);
+        }
     };
 
     return (
         <div className="flex">
-            <Sidebar />
+            {/* <Sidebar /> [SENU] */}
+            
+            { loading && <LoadingOverlay/>}
 
             <div className="flex-1 px-6 py-8">
                 <h1 className="text-3xl font-bold text-center mb-8 text-green-700">Find a Doctor</h1>
 
+                {/* FILTER */}
                 <div className="grid md:grid-cols-2 gap-4 mb-8">
+
+                    {/* SEARCH BY NAME */}
                     <input
                         type="text"
                         placeholder="Search by name..."
@@ -197,6 +260,7 @@ export default function DoctorListWithAvailability() {
                         onChange={(e) => setFilters({ ...filters, name: e.target.value })}
                     />
 
+                    {/* SEARCH BY SPECILAIZATION */}
                     <select
                         className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                         value={filters.specialty}
@@ -210,18 +274,26 @@ export default function DoctorListWithAvailability() {
                         ))}
                     </select>
                 </div>
+                
 
+                {/* EMPTY CASE */}
                 {filteredDoctors.length === 0 ? (
                     <p className="text-center text-gray-500">No doctors found.</p>
                 ) : (
+
+                    // LOOP ON DOCTORS
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredDoctors.map((doc) => (
                             <div
-                                key={doc.id}
+                                key={doc.doctor_id} // Use doctor_id as the key
                                 className="bg-white min-h-[220px] rounded-xl shadow-md p-6 hover:shadow-lg transition duration-300 border border-gray-100"
                             >
-                                <h2 className="text-xl font-semibold text-green-800 mb-2">{doc.name}</h2>
-                                <p className="text-gray-600 mb-4">{doc.specialty}</p>
+                                <h2 className="text-xl font-semibold text-green-800 mb-2">{doc.doctor_name}</h2> {/* Use doctor_name */}
+                                <p className="text-gray-600 mb-4">
+                                    <strong></strong>{' '}
+                                    {doc.specializations.map((spec) => spec.name).join(', ')}
+                                </p>
+                                <p className="text-gray-600 mb-4">{doc.location}</p>
 
                                 <button
                                     onClick={() => handleBook(doc)}

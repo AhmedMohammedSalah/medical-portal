@@ -99,7 +99,7 @@ const apiEndpoints = {
     googleAuth: (tokenData) => api.post("users/google-auth/", tokenData),
     googleLogin: () => api.get("users/auth/google/"), // For server-side flow
   },
-   profile: {
+  profile: {
     getPatientProfile: () => api.get("patients/me/"),
     updatePatientProfile: (data) => api.put("patients/me/", data),
     getDoctorProfile: () => api.get("doctors/doctors/me"),
@@ -111,8 +111,17 @@ const apiEndpoints = {
     updateUser: (userData) => api.patch("users/me/", userData),
     deleteUser: () => api.delete("users/me/"),
   },
-  
-  // Add other endpoints as needed
+  doctors: {
+    doctorsResponse: () => api.get("doctors/doctors/"),
+  },
+  appointments: {
+    getDoctorAvailableAppointments: (doctorId) =>
+      api.get(`appointments`, { params: { doctor_id: doctorId, reserve_status: 'available' }}),
+    
+    // Add the bookAppointment method
+    bookAppointment: (appointmentId, data) =>
+      api.patch(`appointments/${appointmentId}/`, data),
+  },
 };
 
 export default apiEndpoints;
