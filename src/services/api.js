@@ -119,6 +119,10 @@ const apiEndpoints = {
     delete: (id) => api.delete(`notifications/${id}/`),
     create: (notificationData) => api.post("notifications/", notificationData),
   },
+  appointments: {
+  listMy: () => api.get("appointments/my"),
+  cancel: (id) => api.post(`appointments/${id}/cancel/`),
+}
   // Add other endpoints as needed
 };
 

@@ -8,7 +8,8 @@ import PatientlistDoctor from "./pages/patientDoctorlist";
 import BookAppointmentModal from "./pages/bookmodel";
 import PatientProfile from "./pages/patient profile";
 import NotFound from "./pages/Notfound";
-import MyAppointments from "./pages/myappointment";
+// import MyAppointments from "./pages/myappointment";
+import MyAppointments from "./pages/appointments/PatientAppointments.jsx";
 import DoctorLayout from "./components/layout/doctor-layout.jsx";
 import DoctorProfile from "./pages/Doctor/DoctorProfile.jsx";
 import PatientLayout from "./components/layout/patient-layout.jsx";
@@ -83,7 +84,7 @@ function App() {
               <Route path="patientlist" element={<PatientlistDoctor />} />
               <Route path="book" element={<BookAppointmentModal />} />
               <Route path="patientprofile" element={<PatientProfile />} />
-              <Route path="appointment" element={<MyAppointments />} />
+              <Route path="appointments" element={<MyAppointments />} />
             </Route>
           </Route>
         </Route>
