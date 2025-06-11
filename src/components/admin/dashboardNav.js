@@ -30,7 +30,7 @@ function Nav() {
                     textColor="emerald"
                     hoverShade="600"
                     focusShade="400"
-                    path="/logout"
+                    path="/"
                     text="Logout"
                 />
             </div>
