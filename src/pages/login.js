@@ -44,7 +44,7 @@ export default function LoginPage() {
           if (result.payload.role == "doctor") {
             navigate("/doctor");
           } else {
-            navigate("/");
+            navigate("/doctor");
           }
         } 
       } catch (err) {

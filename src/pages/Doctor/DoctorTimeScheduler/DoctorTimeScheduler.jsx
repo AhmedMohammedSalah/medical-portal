@@ -18,7 +18,7 @@ import {
   CheckCircle,
   ChevronRightCircle,
 } from "lucide-react";
-
+import apiEndpoints from "../../../services/api";
 
 
 // DEFINE DAYS
@@ -34,11 +34,6 @@ const dayMap = {
   Saturday: "sat",
   Sunday: "sun"
 };
-
-
-//=DOCTOR ID SIMULATION==
-const doctor_id = 4; 
-//=======================
 
 
 
@@ -59,41 +54,38 @@ export default function WeeklyScheduler() {
   const [loading, setLoading] = useState(false);
   //----------------------------------------------
 
-
+  const [doctorId, setDoctorId] = useState(""); // <-- FIXED: track doctor_id in state
 
 
   // ON MOUNT:
-  useEffect(()=>{
-
+  useEffect(() => {
     const fetchAppointments = async () => {
-
       setLoading(true); //[SENU]: ❤️ START LOADING
   
       try {
-        const response = await axios.get(`http://localhost:8000/appointments/?doctor_id=${doctor_id}`);
+        const userResponse = await apiEndpoints.users.getCurrentUser();
+        const fetchedDoctorId = userResponse.data.id;
+        setDoctorId(fetchedDoctorId); // <-- store in state
+
+        const response = await axios.get(`http://localhost:8000/appointments/?doctor_id=${fetchedDoctorId}`);
         const appointments = response.data;
-  
+
         // Transform appointments into frontend format
         const slotsByDay = {};
-  
         appointments.forEach((appt) => {
-          // Convert backend format (e.g., "mon") to "Monday"
           const day = Object.keys(dayMap).find(key => dayMap[key] === appt.day);
-          if (!day) return; // skip unknown days
-  
-          if (!slotsByDay[day]) {
-            slotsByDay[day] = [];
-          }
-  
+          if (!day) return;
+
+          if (!slotsByDay[day]) slotsByDay[day] = [];
+
           slotsByDay[day].push({
             id: appt.id,
             from: appt.from_time,
             to: appt.to_time,
           });
         });
-  
-        setSlots(slotsByDay); // update state with formatted data
-  
+
+        setSlots(slotsByDay);
       } catch (err) {
         console.error("Failed to fetch appointments", err);
         showToast("Failed to load appointments");
@@ -101,10 +93,9 @@ export default function WeeklyScheduler() {
         setLoading(false); //[SENU]: ❤️ STOP LOADING
       }
     };
-  
-    fetchAppointments();
 
-  }, [])
+    fetchAppointments();
+  }, []);
 
   // SHOW TOAST
   const showToast = (message, type = "error") => {
@@ -113,164 +104,114 @@ export default function WeeklyScheduler() {
     setTimeout(() => setToast(""), 3000);
   };
 
-// ADD NEW SLOTS
-const addSlot = async () => {
+  // ADD NEW SLOTS
+  const addSlot = async () => {
+    //[SENU]
+    // ❤️ BEGIN LOADING 
+    setLoading(true);
 
+    // VARIABLES----------
+    let hasOverlap = false;
+    const newSlots = { ...slots };
+    const appointmentsToCreate = [];
+    const selectedDays = useRange ? getDays(fromDay, toDay) : [fromDay];
 
-  //[SENU]
-  // ❤️ BEGIN LOADING 
-  setLoading(true);
+    // SEGMENT THE TIME RANGE INTO HOURS
+    const timeSegments = getHourlyTimesBasedOnRange([fromTime, toTime]);
 
+    // VALIDATION-----------------------------
+    if (timeSegments.length === 0) {
+      setLoading(false); //[SENU]❤️ STOP LOADING
+      return showToast("Time range must be > 0 and divisible by 60 mins");
+    }
 
-  // VARIABLES----------
-  let hasOverlap = false;
-  const newSlots = { ...slots };
-  const appointmentsToCreate = [];
-  const selectedDays = useRange ? getDays(fromDay, toDay) : [fromDay];
-
-  // SEGMENT THE TIME RANGE INTO HOURS
-  const timeSegments = getHourlyTimesBasedOnRange([fromTime, toTime]);
-
-  // VALIDATION-----------------------------
-  if (timeSegments.length === 0) {
-    setLoading(false); //[SENU]❤️ STOP LOADING
-    return showToast("Time range must be > 0 and divisible by 60 mins");
-  }
-
-  // LOOP ON SELECTED DAYS========================================================
-  selectedDays.forEach((day) => {
-
-    // INIT NON-SELECTED DAYS WITH EMPTY
-    if (!newSlots[day]) newSlots[day] = [];
-
-    // LOOP ON THE TIME RANGE:
-    timeSegments.forEach(({from, to}) => {
-
-      // MAKE NEW OBJECT
-      const newSlot = { fromTime: from, toTime: to };
-
-      // VALIDATION: CHECK OVERLAPPING-----------------
-      const overlapping = newSlots[day].find((slot) =>
-        isTimeOverlap(slot, newSlot)
-      );
-
-      if (overlapping) {
-        hasOverlap = true;
-      } else {
-        // PUSH TO SLOTS (FRONTEND)
-        // newSlots[day].push({ from, to });
-
-        // [SENU]: MOST IMPORTANT PART
-        appointmentsToCreate.push({
-          doctor_id,               // SIMULATED
-          day: dayMap[day],        // BACKEND FORMAT
-          from_time: from,
-          to_time: to,
-        });
-      }
-    });
-
-  }); //===========================================================================
-
-  // IF OVERLAP DETECTED
-  if (hasOverlap) {
-    setLoading(false); //[SENU] ❤️ STOP LOADING
-    return showToast(`Slot ${fromTime} - ${toTime} overlaps with existing`);
-  }
-
-  // SAVE SLOTS
-  try {
-
-    // PRINTING THE NEW SLOTS MADE
-    console.log("new slots = ", newSlots);
-
-    // PRINTING THE BACKEND OBJECTS
-    console.log("appointments to create = ", appointmentsToCreate);
-
-    // SEND TO BACKEND
-    const response = await axios.post("http://localhost:8000/appointments/", appointmentsToCreate);
-    const savedAppointments = response.data;
-
-    // MERGE BACK: use returned IDs from backend==============================
-    savedAppointments.forEach((appt) => {
-
-      const day = Object.keys(dayMap).find((key) => dayMap[key] === appt.day);
+    // LOOP ON SELECTED DAYS========================================================
+    selectedDays.forEach((day) => {
       if (!newSlots[day]) newSlots[day] = [];
 
-      newSlots[day].push({
-        id: appt.id,
-        from: appt.from_time,
-        to: appt.to_time,
-      });//====================================================================
+      timeSegments.forEach(({ from, to }) => {
+        const newSlot = { fromTime: from, toTime: to };
 
+        const overlapping = newSlots[day].find((slot) =>
+          isTimeOverlap(slot, newSlot)
+        );
+
+        if (overlapping) {
+          hasOverlap = true;
+        } else {
+          appointmentsToCreate.push({
+            doctor_id: doctorId,  // <-- use state
+            day: dayMap[day],
+            from_time: from,
+            to_time: to,
+          });
+        }
+      });
     });
 
-    
-    // DEBUG:
-    console.log("newSlots = ", newSlots)
+    if (hasOverlap) {
+      setLoading(false); //[SENU] ❤️ STOP LOADING
+      return showToast(`Slot ${fromTime} - ${toTime} overlaps with existing`);
+    }
 
-    // SET FRONTEND STATE
-    setSlots(newSlots);
+    try {
+      console.log("new slots = ", newSlots);
+      console.log("appointments to create = ", appointmentsToCreate);
 
-    //[SENU]❤️ STOP LOADING
-    setLoading(false);
-   
+      const response = await axios.post("http://localhost:8000/appointments/", appointmentsToCreate);
+      const savedAppointments = response.data;
 
-    showToast(`Slot ${fromTime} - ${toTime} added`, "success");
+      savedAppointments.forEach((appt) => {
+        const day = Object.keys(dayMap).find((key) => dayMap[key] === appt.day);
+        if (!newSlots[day]) newSlots[day] = [];
 
-  } catch (err) {
-    console.error(err);
+        newSlots[day].push({
+          id: appt.id,
+          from: appt.from_time,
+          to: appt.to_time,
+        });
+      });
 
-    //[SENU]❤️ STOP LOADING
-    setLoading(false);
-    showToast("Backend error: could not save appointments");
-  }
-};
+      console.log("newSlots = ", newSlots);
+      setSlots(newSlots);
+      setLoading(false); //[SENU]❤️ STOP LOADING
+      showToast(`Slot ${fromTime} - ${toTime} added`, "success");
 
-
-
-
+    } catch (err) {
+      console.error(err);
+      setLoading(false); //[SENU]❤️ STOP LOADING
+      showToast("Backend error: could not save appointments");
+    }
+  };
 
 
   // DELETE SLOT
   const removeSlot = async (day, slotIndex) => {
-
     setLoading(true); //[SENU]❤️ START LOADING
-  
+
     const slotToDelete = slots[day][slotIndex];
-    // console.log("slotIndex = ", slotIndex)
-    // console.log("the slot i intend to delete = ", slotToDelete)
-  
+
     try {
-      // BACKEND REMOVE
       await axios.delete(`http://localhost:8000/appointments/${slotToDelete.id}/`);
-  
-      // FRONTEND REMOVE
+
       setSlots((prev) => {
         const updated = { ...prev };
         updated[day] = updated[day].filter((_, i) => i !== slotIndex);
         if (updated[day].length === 0) delete updated[day];
         return updated;
       });
-  
+
       showToast("Slot removed successfully", "success");
 
-    } 
-    // FAILED
-    catch (error) {
+    } catch (error) {
       console.error(error);
       showToast("Failed to delete slot", "error");
-    } 
-
-    finally {
+    } finally {
       setLoading(false); //[SENU]❤️ STOP LOADING
     }
   };
-  
 
 
-
-  
   // CALCULATE TOTAL APPOINTMENTS IN ONE DAY
   const getTotalAppointments = (day) => {
     const slotsInDay = slots[day] || [];

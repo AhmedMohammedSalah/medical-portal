@@ -7,6 +7,7 @@ import { days, headCellClass, valueCellClass } from "./constants";
 import { initialAppointments, initialPatients } from "./mocData";
 import axios from "axios";
 import LoadingOverlay from './../../../components/shared/LoadingOverlay'
+import apiEndpoints from "../../../services/api";
 
 export default function DoctorAppointments() {
 
@@ -82,8 +83,15 @@ export default function DoctorAppointments() {
             setLoading(true)
 
             // FETCH appointments that only has reserve status pending
-            const res = await axios.get("http://localhost:8000/appointments/?not_reserve_status=available,cancelled");
-            const data = res.data;
+            const userResponse = await apiEndpoints.users.getCurrentUser();
+            const doctorId = userResponse.data.id;
+            const res = await axios.get("http://localhost:8000/appointments/", {
+              params: {
+                not_reserve_status: "available,cancelled",
+                doctor_id: doctorId, // <== ADD THIS LINE
+              },
+            });
+                        const data = res.data;
             console.log("appointments data = ", data)
 
             // [SENU] 🛑 CHECK EMPTY CASE
