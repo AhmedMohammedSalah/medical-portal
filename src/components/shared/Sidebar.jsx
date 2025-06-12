@@ -72,7 +72,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
             id: "dashboard",
             label: "Dashboard",
             icon: Home,
-            href: "/doctor/dashboard",
+            href: "/doctor",
           },
           {
             id: "calendar",
@@ -96,7 +96,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
             id: "settings",
             label: "Settings",
             icon: Settings,
-            href: "/doctor/settings",
+            href: "/doctor/DoctorProfile",
           },
         ];
       case "patient":
@@ -106,7 +106,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
             id: "dashboard",
             label: "Dashboard",
             icon: Home,
-            href: "/patient/dashboard",
+            href: "/patient",
           },
           {
             id: "doctors",
@@ -130,7 +130,7 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
             id: "settings",
             label: "Settings",
             icon: Settings,
-            href: "/patient/settings",
+            href: "/patient/patientprofile",
           },
         ];
     }
@@ -232,7 +232,9 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
           </div>
           {!isCollapsed && (
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-800">{user.name}</p>
+              <p className="text-sm font-medium text-gray-800">
+                {user?.name || "User"}
+              </p>
               <p className="text-xs text-gray-500">{getRoleLabel()}</p>
             </div>
           )}
