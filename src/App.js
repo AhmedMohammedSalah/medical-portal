@@ -84,8 +84,8 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route element={<RequireRole allowedRoles={["patient"]} />}>
             <Route path="/patient" element={<PatientLayout />}>
+              <Route index element={<PatientlistDoctor />} /> {/* Index route */}
               <Route path="appointments/:id" element={<PatientDetails />} />
-              <Route path="patientlist" element={<PatientlistDoctor />} />
               <Route path="book" element={<BookAppointmentModal />} />
               <Route path="patientprofile" element={<PatientProfile />} />
               <Route path="appointments" element={<MyAppointments />} />

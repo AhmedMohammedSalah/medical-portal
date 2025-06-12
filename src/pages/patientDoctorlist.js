@@ -232,7 +232,11 @@ export default function DoctorListWithAvailability() {
 
     console.log('Doctors:', doctors);
 
-    const specialties = [...new Set(doctors.map((doc) => doc.specializations))];
+    const specialties = [
+        ...new Set(
+            doctors.flatMap((doc) => doc.specializations.map((spec) => spec.name))
+        ),
+    ];
 
     const handleBook = async (doctor) => {
         if (!doctor) {
@@ -241,9 +245,12 @@ export default function DoctorListWithAvailability() {
         }
 
         try {
-            // Fetch appointments for the selected doctor with reserve_status='available'
-            const response = await apiEndpoints.appointments.getDoctorAvailableAppointments(doctor.doctor_id);
+            // Fetch appointments for the selected doctor with reserve_status='available' and is_deleted=false
+            const response = await apiEndpoints.appointments.getDoctorAvailableAppointments(doctor.doctor_id, {
+                params: { is_deleted: false }, // Add is_deleted=false filter
+            });
             console.log('Available appointments:', response.data);
+
             if (!response.data || response.data.length === 0) {
                 console.error('No available appointments found for this doctor.');
                 return;
@@ -305,21 +312,39 @@ export default function DoctorListWithAvailability() {
                         {filteredDoctors.map((doc) => (
                             <div
                                 key={doc.doctor_id} // Use doctor_id as the key
-                                className="bg-white min-h-[220px] rounded-xl shadow-md p-6 hover:shadow-lg transition duration-300 border border-gray-100"
+                                className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition duration-300 border border-gray-100 flex"
                             >
-                                <h2 className="text-xl font-semibold text-green-800 mb-2">{doc.doctor_name}</h2> {/* Use doctor_name */}
-                                <p className="text-gray-600 mb-4">
-                                    <strong></strong>{' '}
-                                    {doc.specializations.map((spec) => spec.name).join(', ')}
-                                </p>
-                                <p className="text-gray-600 mb-4">{doc.location}</p>
+                                {/* Doctor Image */}
+                                <div className="w-1/3 flex-shrink-0">
+                                    <img
+                                        src={doc.doctor_image_path || '/default-doctor.png'} // Fallback to a default image if doctor_image_path is null
+                                        alt={`${doc.doctor_name}'s profile`}
+                                        className="w-full h-full object-cover rounded-lg"
+                                        onError={(e) => {
+                                            e.target.onerror = null; // Prevent infinite loop
+                                            e.target.src = 'https://balancehealth.com/wp-content/uploads/male-provider-placeholder.webp'; // Fallback image
+                                        }}
+                                    />
+                                </div>
 
-                                <button
-                                    onClick={() => handleBook(doc)}
-                                    className="text-sm text-white bg-green-600 px-5 py-2 rounded-lg hover:bg-green-700"
-                                >
-                                    Book Appointment
-                                </button>
+                                {/* Doctor Data */}
+                                <div className="w-2/3 pl-4">
+                                    <h2 className="text-xl font-semibold text-green-800 mb-2">{doc.doctor_name}</h2>
+                                    <p className="text-gray-600 mb-2">
+                                        <strong>Specializations:</strong>{' '}
+                                        {doc.specializations.map((spec) => spec.name).join(', ')}
+                                    </p>
+                                    <p className="text-gray-600 mb-4">
+                                        <strong>Location:</strong> {doc.location}
+                                    </p>
+
+                                    <button
+                                        onClick={() => handleBook(doc)}
+                                        className="text-sm text-white bg-green-600 px-5 py-2 rounded-lg hover:bg-green-700"
+                                    >
+                                        Book Appointment
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

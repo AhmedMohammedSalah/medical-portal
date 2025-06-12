@@ -103,16 +103,10 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
       default:
         return [
           {
-            id: "dashboard",
-            label: "Dashboard",
-            icon: Home,
-            href: "/patient",
-          },
-          {
             id: "doctors",
             label: "Find Doctors",
             icon: UserCheck,
-            href: "/patient/patientlist",
+            href: "/patient/",
           },
           {
             id: "appointments",
@@ -124,12 +118,6 @@ const Sidebar = ({ userRole = "patient", isCollapsed = false, onToggle }) => {
             id: "profile",
             label: "My Profile",
             icon: User,
-            href: "/patient/patientprofile",
-          },
-          {
-            id: "settings",
-            label: "Settings",
-            icon: Settings,
             href: "/patient/patientprofile",
           },
         ];
