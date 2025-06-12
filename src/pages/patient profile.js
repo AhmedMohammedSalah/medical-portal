@@ -117,7 +117,7 @@ export default function PatientProfile() {
             )}
             {/* CHANGE END */}
             <div>
-              <h2 className="text-3xl font-bold text-gray-800">Patient Profile</h2>
+              <h2 className="text-3xl font-bold text-green-800">Patient Profile</h2>
               <p className="text-sm text-gray-500">Manage your personal details</p>
             </div>
           </div>

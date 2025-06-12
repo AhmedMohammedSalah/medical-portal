@@ -22,12 +22,13 @@ export default function DoctorProfile() {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [specializationInput, setSpecializationInput] = useState(''); // [OKS] Input field for adding specialization
 
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
       try {
-        //[OKS] First get user info
+        // [OKS] First get user info
         const userResponse = await apiEndpoints.users.getCurrentUser();
         // [OKS] Then get doctor profile
         const doctorResponse = await apiEndpoints.profile.getDoctorProfile();
@@ -73,6 +74,26 @@ export default function DoctorProfile() {
       available_days: checked
         ? [...prev.available_days, value]
         : prev.available_days.filter(day => day !== value),
+    }));
+  };
+
+  // [OKS] Handle adding specialization to the list
+  const handleAddSpecialization = () => {
+    const trimmed = specializationInput.trim();
+    if (trimmed && !profile.specializations.includes(trimmed)) {
+      setProfile(prev => ({
+        ...prev,
+        specializations: [...prev.specializations, trimmed],
+      }));
+      setSpecializationInput('');
+    }
+  };
+
+  // [OKS] Handle removing specialization
+  const handleRemoveSpecialization = (spec) => {
+    setProfile(prev => ({
+      ...prev,
+      specializations: prev.specializations.filter(s => s !== spec),
     }));
   };
 
@@ -123,7 +144,7 @@ export default function DoctorProfile() {
     </div>
   );
 
-  //[OKS] Days of week for selection
+  // [OKS] Days of week for selection
   const weekDays = [
     { label: 'Saturday', value: 'sat' },
     { label: 'Sunday', value: 'sun' },
@@ -151,7 +172,7 @@ export default function DoctorProfile() {
               )}
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-gray-800">Doctor Profile</h2>
+              <h2 className="text-3xl font-bold text-green-800">Doctor Profile</h2>
               <p className="text-sm text-gray-500">Manage your professional details</p>
             </div>
           </div>
@@ -241,7 +262,7 @@ export default function DoctorProfile() {
                         <input
                           type="checkbox"
                           value={day.value}
-                          checked={Array.isArray(profile.available_days) && profile.available_days.includes(day.value)}
+                          checked={profile.available_days.includes(day.value)}
                           onChange={handleDaysChange}
                         />
                         {day.label}
@@ -251,7 +272,7 @@ export default function DoctorProfile() {
                 </div>
               )}
 
-
+             
               <div className="col-span-1 sm:col-span-2 flex justify-end gap-3 mt-4">
                 <button
                   type="button"
@@ -263,7 +284,7 @@ export default function DoctorProfile() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   disabled={loading}
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
@@ -296,16 +317,17 @@ export default function DoctorProfile() {
                 <div className="sm:col-span-2">
                   <p className="text-sm text-gray-500">Available Days</p>
                   <p className="font-medium">
-                    {Array.isArray(profile.available_days) && profile.available_days.length
+                    {profile.available_days.length
                       ? profile.available_days.map(d => weekDays.find(wd => wd.value === d)?.label).join(', ')
                       : 'None'}
                   </p>
                 </div>
               )}
+             
               <div className="col-span-1 sm:col-span-2 mt-6">
                 <button
                   onClick={() => setEditMode(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
                   Edit Profile
                 </button>

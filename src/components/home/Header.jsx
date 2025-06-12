@@ -1,29 +1,46 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {Link} from "react-router-dom";
 import {
   Search,
   User,
-  ShoppingCart,
   Menu,
   X,
   Phone,
   Mail,
   MapPin,
-  ChevronDown,
 } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null); 
+    //[OKS] handle logout
+      const handleLogout = () => {
+        localStorage.removeItem("access_token");
+        setUser(null); 
+        navigate("/login");
+   };  
 
   useEffect(() => {
+    // [OKS] Check if user is logged in
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        setUser({ token }); 
+      } else {
+        setUser(null);
+      }
+
     const handleClickOutside = (event) => {
       if (showUserDropdown && !event.target.closest(".relative")) {
         setShowUserDropdown(false);
       }
     };
+    
+
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -100,67 +117,53 @@ const Header = () => {
 
             {/* Dropdown Menu */}
             {showUserDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
-                {/* Cart Section */}
-                <div className="p-4 border-b border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <User className="w-5 h-5 text-emerald-600" />
-                      <div className="relative">
-                        <ShoppingCart className="w-5 h-5 text-emerald-600" />
-                        <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                          2
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-gray-800">
-                        YOUR CART
-                      </div>
-                      <div className="text-lg font-bold text-emerald-600">
-                        $69.25
-                      </div>
-                    </div>
-                  </div>
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+              {/* User Info */}
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center space-x-2">
+                  <User className="w-5 h-5 text-emerald-600" />
+                  <span className="font-medium text-gray-700">
+                    {user ? "Welcome Back!" : "Guest"}
+                  </span>
                 </div>
+              </div>
 
-                {/* Menu Options */}
+              {/* Show Logout if logged in */}
+              {user ? (
+                <div className="p-4">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded text-sm"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
                 <div className="py-2">
                   <Link
-                    to="/"
+                    to="/login"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-emerald-600"
                   >
                     Sign in
                   </Link>
                   <Link
-                    to="/"
+                    to="/register"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-emerald-600"
                   >
                     Register
                   </Link>
-                  <Link
-                    to="/"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-emerald-600"
-                  >
-                    My Account
-                  </Link>
-                  <Link
-                    to="/"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-emerald-600"
-                  >
-                    Wishlist
-                  </Link>
                 </div>
+              )}
 
-                {/* Contact Section */}
-                <div className="p-4 border-t border-gray-100 bg-gray-50">
-                  <div className="flex items-center space-x-2 text-emerald-600">
-                    <Phone className="w-4 h-4" />
-                    <span className="font-medium">+123-456-789-10</span>
-                  </div>
+              <div className="p-4 border-t border-gray-100 bg-gray-50">
+                <div className="flex items-center space-x-2 text-emerald-600">
+                  <Phone className="w-4 h-4" />
+                  <span className="font-medium">+123-456-789-10</span>
                 </div>
               </div>
-            )}
+            </div>
+          )}
+
           </div>
           <button
             className="md:hidden"
@@ -198,7 +201,7 @@ const Header = () => {
               </li>
               <li>
                 <Link
-                  to="/"
+                  to="/patient/patientlist"
                   className="block py-2 md:py-4 text-white hover:text-emerald-200 font-medium"
                 >
                   Doctors
@@ -206,7 +209,7 @@ const Header = () => {
               </li>
               <li>
                 <Link
-                  to="/"
+                  to="appointments"
                   className="block py-2 md:py-4 text-white hover:text-emerald-200 font-medium"
                 >
                   Appointments
