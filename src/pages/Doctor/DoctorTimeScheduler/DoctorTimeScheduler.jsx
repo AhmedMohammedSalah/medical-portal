@@ -60,38 +60,41 @@ export default function WeeklyScheduler() {
   // ON MOUNT:
   useEffect(() => {
     const fetchAppointments = async () => {
-      setLoading(true); //[SENU]: ❤️ START LOADING
-  
-      try {
-        const userResponse = await apiEndpoints.users.getCurrentUser();
-        const fetchedDoctorId = userResponse.data.id;
-        setDoctorId(fetchedDoctorId); // <-- store in state
+        setLoading(true); // Start loading
 
-        const response = await axios.get(`http://localhost:8000/appointments/?doctor_id=${fetchedDoctorId}`);
-        const appointments = response.data;
+        try {
+            const userResponse = await apiEndpoints.users.getCurrentUser();
+            const fetchedDoctorId = userResponse.data.id;
+            setDoctorId(fetchedDoctorId); // Store in state
 
-        // Transform appointments into frontend format
-        const slotsByDay = {};
-        appointments.forEach((appt) => {
-          const day = Object.keys(dayMap).find(key => dayMap[key] === appt.day);
-          if (!day) return;
+            // Fetch appointments with is_deleted=false
+            const response = await axios.get(
+                `http://localhost:8000/appointments/?doctor_id=${fetchedDoctorId}&is_deleted=false`
+            );
+            const appointments = response.data;
 
-          if (!slotsByDay[day]) slotsByDay[day] = [];
+            // Transform appointments into frontend format
+            const slotsByDay = {};
+            appointments.forEach((appt) => {
+                const day = Object.keys(dayMap).find((key) => dayMap[key] === appt.day);
+                if (!day) return;
 
-          slotsByDay[day].push({
-            id: appt.id,
-            from: appt.from_time,
-            to: appt.to_time,
-          });
-        });
+                if (!slotsByDay[day]) slotsByDay[day] = [];
 
-        setSlots(slotsByDay);
-      } catch (err) {
-        console.error("Failed to fetch appointments", err);
-        showToast("Failed to load appointments");
-      } finally {
-        setLoading(false); //[SENU]: ❤️ STOP LOADING
-      }
+                slotsByDay[day].push({
+                    id: appt.id,
+                    from: appt.from_time,
+                    to: appt.to_time,
+                });
+            });
+
+            setSlots(slotsByDay);
+        } catch (err) {
+            console.error("Failed to fetch appointments", err);
+            showToast("Failed to load appointments");
+        } finally {
+            setLoading(false); // Stop loading
+        }
     };
 
     fetchAppointments();
@@ -187,27 +190,30 @@ export default function WeeklyScheduler() {
 
   // DELETE SLOT
   const removeSlot = async (day, slotIndex) => {
-    setLoading(true); //[SENU]❤️ START LOADING
+    setLoading(true); // Start loading
 
     const slotToDelete = slots[day][slotIndex];
 
     try {
-      await axios.delete(`http://localhost:8000/appointments/${slotToDelete.id}/`);
+        // Update the appointment to set is_deleted=true
+        await axios.patch(`http://localhost:8000/appointments/${slotToDelete.id}/`, {
+            is_deleted: true,
+        });
 
-      setSlots((prev) => {
-        const updated = { ...prev };
-        updated[day] = updated[day].filter((_, i) => i !== slotIndex);
-        if (updated[day].length === 0) delete updated[day];
-        return updated;
-      });
+        // Update the frontend state
+        setSlots((prev) => {
+            const updated = { ...prev };
+            updated[day] = updated[day].filter((_, i) => i !== slotIndex);
+            if (updated[day].length === 0) delete updated[day];
+            return updated;
+        });
 
-      showToast("Slot removed successfully", "success");
-
+        showToast("Slot removed successfully", "success");
     } catch (error) {
-      console.error(error);
-      showToast("Failed to delete slot", "error");
+        console.error(error);
+        showToast("Failed to remove slot", "error");
     } finally {
-      setLoading(false); //[SENU]❤️ STOP LOADING
+        setLoading(false); // Stop loading
     }
   };
 
