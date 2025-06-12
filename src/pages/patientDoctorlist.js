@@ -17,6 +17,14 @@ function BookingModal({ doctor, onClose }) {
     const availableAppointments = doctor.availableAppointments || [];
     const days = [...new Set(availableAppointments.map((appt) => appt.day))];
 
+    // Get the current day and time
+    const currentDate = new Date();
+    const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase(); // e.g., "mon"
+    const currentTime = currentDate.toTimeString().slice(0, 5); // e.g., "14:30"
+
+    // Define the week order
+    const weekOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
     // Handle day selection and update time slots
     const handleDayChange = (day) => {
         setSelectedDay(day);
@@ -25,10 +33,12 @@ function BookingModal({ doctor, onClose }) {
         // Filter available appointments for the selected day and extract time slots with IDs
         const filteredTimes = availableAppointments
             .filter((appt) => appt.day === day)
-            .map((appt) => ({ id: appt.id, time: `${appt.from_time} - ${appt.to_time}` })); // Include appointment ID
+            .map((appt) => ({
+                id: appt.id,
+                time: `${appt.from_time} - ${appt.to_time}`,
+                isOutdated: day === currentDay && appt.from_time < currentTime, // Check if time is outdated
+            }));
         setTimes(filteredTimes);
-
-        console.log('Filtered times for selected day:', filteredTimes); // Debugging
     };
 
 
@@ -107,11 +117,15 @@ function BookingModal({ doctor, onClose }) {
                             className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         >
                             <option value="">-- Choose a day --</option>
-                            {days.map((day) => (
-                                <option key={day} value={day}>
-                                    {day}
-                                </option>
-                            ))}
+                            {days.map((day) => {
+                                const isOutdated =
+                                    weekOrder.indexOf(day) < weekOrder.indexOf(currentDay);
+                                return (
+                                    <option key={day} value={day} disabled={isOutdated}>
+                                        {day.toUpperCase()} {isOutdated && '(Outdated)'}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </div>
 
@@ -125,8 +139,8 @@ function BookingModal({ doctor, onClose }) {
                             >
                                 <option value="">-- Choose a time --</option>
                                 {times.map((time) => (
-                                    <option key={time.id} value={time.id}>
-                                        {time.time}
+                                    <option key={time.id} value={time.id} disabled={time.isOutdated}>
+                                        {time.time} {time.isOutdated && '(Outdated)'}
                                     </option>
                                 ))}
                             </select>
@@ -207,13 +221,18 @@ export default function DoctorListWithAvailability() {
     useEffect(() => {
         const filtered = doctors.filter(
             (doc) =>
-                doc.doctor_name.toLowerCase().includes(filters.name.toLowerCase()) && // Use doctor_name
-                (filters.specialty === '' || doc.specialty === filters.specialty)
+                doc.doctor_name.toLowerCase().includes(filters.name.toLowerCase()) && // Filter by name
+                (filters.specialty === '' || 
+                 doc.specializations.some((spec) => spec.name === filters.specialty)) // Filter by specialization
         );
         setFilteredDoctors(filtered);
     }, [filters, doctors]);
 
-    const specialties = [...new Set(doctors.map((doc) => doc.specialty))];
+    // GETTING THE SPECIALIZATIONS OF THE DOCTORS
+
+    console.log('Doctors:', doctors);
+
+    const specialties = [...new Set(doctors.map((doc) => doc.specializations))];
 
     const handleBook = async (doctor) => {
         if (!doctor) {

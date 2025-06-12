@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 // Create axios instance
 const api = axios.create({
   baseURL: "http://localhost:8000/",
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
