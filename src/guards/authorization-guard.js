@@ -2,8 +2,9 @@ import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 
 export function RequireAuth() {
-  const { user } = useSelector((state) => state.auth);
-    console.log(user)
+  
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log(user)
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -11,8 +12,8 @@ export function RequireAuth() {
 }
 
 export function RequireRole({ allowedRoles }) {
-    const { user } = useSelector( ( state ) => state.auth );
-    console.log(user)
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log(user)
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -24,8 +25,8 @@ export function RequireRole({ allowedRoles }) {
 }
 
 export function RequireNoRole() {
-    const { user } = useSelector((state) => state.auth);
-    if (user) {
+    const user = JSON.parse(localStorage.getItem("user"));
+  if (user) {
         if ( user.role == "patient" ) {
             return <Navigate to="/patient" replace />;
         } else if ( user.role == "doctor" ) {

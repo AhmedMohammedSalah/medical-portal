@@ -21,7 +21,11 @@ import DoctorAppointments from "./pages/Doctor/DoctorAppointments/index.jsx";
 // import IconButton from './components/shared/iconButton';
 import LoginPage from "./pages/login.js";
 import RegisterPage from "./pages/register.js";
-import { RequireAuth, RequireNoRole, RequireRole } from "./guards/authorization-guard.js";
+import {
+  RequireAuth,
+  RequireNoRole,
+  RequireRole,
+} from "./guards/authorization-guard.js";
 import Unauthorized from "./components/shared/unauthorized.jsx";
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -77,8 +81,8 @@ function App() {
         {/* [AMS] Patient layout */}
 
         {/* Patient routes - only for authenticated patients */}
-        {/* <Route element={<RequireAuth />}> */}
-          {/* <Route element={<RequireRole allowedRoles={["patient"]} />}> */}
+        <Route element={<RequireAuth />}>
+          <Route element={<RequireRole allowedRoles={["patient"]} />}>
             <Route path="/patient" element={<PatientLayout />}>
               <Route path="appointments/:id" element={<PatientDetails />} />
               <Route path="patientlist" element={<PatientlistDoctor />} />
@@ -86,8 +90,8 @@ function App() {
               <Route path="patientprofile" element={<PatientProfile />} />
               <Route path="appointments" element={<MyAppointments />} />
             </Route>
-          {/* </Route> */}
-        {/* </Route> */}
+          </Route>
+        </Route>
 
         {/* [AMS]=> 🙂 unauthorized page */}
         <Route path="/unauthorized" element={<Unauthorized />} />
