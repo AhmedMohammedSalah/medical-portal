@@ -193,15 +193,14 @@ const Header = () => {
               </li>
               <li>
                 <Link
-                  to="/"
+                  to="login"
                   className="block py-2 md:py-4 text-white hover:text-emerald-200 font-medium"
                 >
                   About
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/patient/patientlist"
+                <Link to="/login"
                   className="block py-2 md:py-4 text-white hover:text-emerald-200 font-medium"
                 >
                   Doctors
@@ -209,7 +208,7 @@ const Header = () => {
               </li>
               <li>
                 <Link
-                  to="appointments"
+                  to="/login"
                   className="block py-2 md:py-4 text-white hover:text-emerald-200 font-medium"
                 >
                   Appointments
@@ -217,7 +216,7 @@ const Header = () => {
               </li>
               <li>
                 <Link
-                  to="/"
+                  to="/login"
                   className="block py-2 md:py-4 text-white hover:text-emerald-200 font-medium"
                 >
                   Services

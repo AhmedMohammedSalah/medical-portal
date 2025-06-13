@@ -13,6 +13,7 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const features = [
@@ -138,7 +139,12 @@ const HomePage = () => {
                   className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <Calendar className="w-5 h-5" />
-                  <span>Book Appointment</span>
+
+
+                  <Link to="/login" className="flex items-center space-x-2">
+                    <span>Book Appointment</span>
+                  </Link>
+
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -289,7 +295,9 @@ const HomePage = () => {
                     {specialty.name}
                   </h3>
                   <div className="flex items-center text-emerald-600 text-sm font-medium">
+                  <Link to="/login" >   
                     <span>View Doctors</span>
+                  </Link>
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </motion.div>
@@ -395,6 +403,7 @@ const HomePage = () => {
             healthcare needs.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <Link to="/login">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -402,6 +411,7 @@ const HomePage = () => {
             >
               Get Started Today
             </motion.button>
+            </Link>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -478,7 +488,9 @@ const HomePage = () => {
               whileTap={{ scale: 0.95 }}
               className="bg-white text-emerald-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center space-x-2"
             >
+              <Link to="/login">  
               <span>Book Appointment</span>
+              </Link>
               <ArrowRight className="w-5 h-5" />
             </motion.button>
           </div>
