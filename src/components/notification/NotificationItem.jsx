@@ -17,7 +17,7 @@ const getIcon = (type) => {
 
 const NotificationItem = ({ notification, onMarkedRead }) => {
   const [isRead, setIsRead] = useState(notification.is_read);
-  const { notification_type, message, created_at, data, id } = notification;
+  const { notification_type, message, created_at, id } = notification;
 
   const handleMarkAsRead = async () => {
     try {
@@ -35,7 +35,7 @@ const NotificationItem = ({ notification, onMarkedRead }) => {
         isRead
           ? "bg-white border-gray-100"
           : "bg-gradient-to-r from-emerald-50 to-white border-emerald-200"
-      } hover:shadow-md`}
+      } hover:shadow-md `}
     >
       <div className="flex flex-col items-center pt-1">
         {getIcon(notification_type)}
@@ -52,12 +52,8 @@ const NotificationItem = ({ notification, onMarkedRead }) => {
             </span>
           )}
         </div>
-        <div className="text-gray-900 mb-1">{message}</div>
-        {data && (
-          <pre className="text-xs text-gray-500 mt-1 bg-gray-100 rounded p-2 overflow-x-auto">
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        )}
+        <pre className="text-gray-900 mb-1">{message}</pre>
+       
         <div className="flex items-center justify-between mt-2">
           <span className="text-xs text-gray-400">
             {new Date(created_at).toLocaleString()}

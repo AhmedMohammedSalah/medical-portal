@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {Link} from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Search,
   User,
@@ -17,14 +18,15 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch(); //[OKS]import dispatch to handle logout
   const [user, setUser] = useState(null); 
     //[OKS] handle logout
-      const handleLogout = () => {
-        localStorage.removeItem("access_token");
-        setUser(null); 
-        navigate("/login");
-   };  
-
+   const handleLogout = () => {
+    // Dispatch logout action
+    dispatch({ type: "auth/logout" });
+    // Optionally, redirect to login page
+    navigate("/");
+  };
   useEffect(() => {
     // [OKS] Check if user is logged in
       const token = localStorage.getItem("access_token");

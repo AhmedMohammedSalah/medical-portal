@@ -136,6 +136,9 @@ const apiEndpoints = {
      listMy: () => api.get("appointments/my"),
      cancel: (id) => api.post(`appointments/${id}/cancel/`),
   },
+  specializations: {
+  getAll: () => api.get('/doctors/specializations/'),
+}
 };
 
 export default apiEndpoints;

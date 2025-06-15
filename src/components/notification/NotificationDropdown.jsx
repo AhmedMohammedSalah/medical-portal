@@ -13,7 +13,10 @@ const NotificationDropdown = () => {
       api.notifications.list().then((res) => {
         setNotifications(res.data);
         setLoading(false);
+          { console.log(res.data)}
+
       });
+        
     }
   }, [open]);
 
@@ -52,9 +55,11 @@ const NotificationDropdown = () => {
                 No notifications
               </div>
             ) : (
-              notifications.map((n) => (
-                <NotificationItem key={n.id} notification={n} />
-              ))
+         notifications.map((n) => (
+  <NotificationItem key={n.id} notification={n} />
+))
+
+              
             )}
           </div>
         </div>

@@ -22,7 +22,7 @@ export const registerUser = createAsyncThunk(
       const response = await api.users.register(userData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response.data.message);
     }
   }
 );
