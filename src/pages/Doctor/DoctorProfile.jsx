@@ -134,6 +134,7 @@ export default function DoctorProfile() {
               <UserIcon className="w-10 h-10" />
             )}
           </div>
+         
           <div>
             <h2 className="text-3xl font-bold text-green-800">Doctor Profile</h2>
             <p className="text-sm text-gray-500">Manage your professional details</p>
@@ -152,7 +153,7 @@ export default function DoctorProfile() {
                 className="w-full px-4 py-2 border rounded-lg bg-gray-100"
               />
             </div>
-
+            
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
@@ -269,6 +270,15 @@ export default function DoctorProfile() {
                 .map((s) => s.name)
                 .join(', ') || 'None'}
             </p>
+            <strong>NarionalID:</strong>{' '}
+
+               <div className="w-20 h-20  bg-blue-100 flex items-center justify-center text-blue-700">
+            {profile.doctor_image_path ? (
+              <img src={profile.national_id_image_path} alt="Doctor" className="w-20 h-20 rounded-full object-cover" />
+            ) : (
+              <UserIcon className="w-10 h-10" />
+            )}
+          </div>
             <button onClick={() => setEditMode(true)} className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg">
               Edit Profile
             </button>
