@@ -3,11 +3,14 @@ import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import AppointmentTable from "./AppointmentTable";
 import ConfirmModal from "./ConfirmModal";
-import { days, headCellClass, valueCellClass } from "./constants";
+import {headCellClass, valueCellClass } from "./constants";
 import { initialAppointments, initialPatients } from "./mocData";
 import axios from "axios";
 import LoadingOverlay from './../../../components/shared/LoadingOverlay'
 import apiEndpoints from "../../../services/api";
+
+
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 export default function DoctorAppointments() {
 

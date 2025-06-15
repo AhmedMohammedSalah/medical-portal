@@ -14,21 +14,31 @@ export default function AppointmentTable({
   loadingAppointments, // [SENU] add loading
 }) {
   
+  console.log("from the table: days", days);
+  console.log("from the table: appointments", appointments)
   console.log("from the table: patients", patients)
+  console.log("timeSlots", timeSlots);
 
-  // Utility function to parse 24-hour time strings (e.g., "14:30") for sorting
+  // utility function to parse 24-hour time strings (e.g., "14:30") for sorting
   const parseTime = (timeStr) => {
     const [hours, minutes] = timeStr.split(":").map(Number);
     return hours * 60 + minutes; // Convert to minutes for easy comparison
   };
 
-  // Filter timeSlots to only include those with at least one patient
-  const filteredTimeSlots = timeSlots.filter(time => 
-    days.some(day => appointments[time]?.[day])
-  );
+  // filter timeSlots to only include those with at least one patient
+  // const filteredTimeSlots = timeSlots.filter(time => 
+  //   days.some(day => appointments[time]?.[day])
+  // );
+  const filteredTimeSlots = timeSlots
+
+  // DEBUG
+  // console.log("Filtered Time Slots:", filteredTimeSlots);
 
   // Sort filtered timeSlots in ascending order
   const sortedTimeSlots = [...filteredTimeSlots].sort((a, b) => parseTime(a) - parseTime(b));
+
+  // Log the sorted time slots
+  // console.log("Sorted Time Slots:", sortedTimeSlots);
 
   return (
     <div className="overflow-x-auto shadow-2xl rounded-2xl border border-green-200 bg-white">
@@ -43,6 +53,8 @@ export default function AppointmentTable({
         </thead>
         <tbody className="divide-y divide-green-100">
           {/*  */}
+
+          
           {sortedTimeSlots.map(time => (
             <tr key={time} className="hover:bg-green-50">
               <td className={`${valueCellClass} font-bold text-green-800`}>
@@ -51,11 +63,12 @@ export default function AppointmentTable({
               {days.map(day => {
                 // WE WILL PLAY HERE
                 const PID = appointments[time]?.[day];
+                // console.log("Patient for PID:", PID, patients[PID]);
                 const patientName = appointments[time]?.[day];
                 const patient = patients[patientName];
 
-                console.log("from table, patientStatus[patient?.name] =", patient ? patientStatus[patient.patient_id] : undefined);
-                console.log("from table, patient.appointment_reserve_status =", patient ? patient.appointment_reserve_status : undefined);
+                // console.log("from table, patientStatus[patient?.name] =", patient ? patientStatus[patient.patient_id] : undefined);
+                // console.log("from table, patient.appointment_reserve_status =", patient ? patient.appointment_reserve_status : undefined);
 
                 return (
                   <td key={day} className={valueCellClass}>
